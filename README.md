@@ -19,3 +19,5 @@ Pure HTML/CSS/JS — no build step, no dependencies. Open `index.html` directly 
 
 - Active work on `dev`
 - `dev` → `main` only after explicit approval
+
+KeMeK Network © 2026
