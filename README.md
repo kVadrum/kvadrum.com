@@ -27,4 +27,4 @@ This repository is dual-licensed:
   (`images/kV.png`, `images/kV-original.png`) are not licensed.
   See [`LICENSE`](./LICENSE) for the trademark note.
 
-Copyright © 2026 KeMeK Network.
+KeMeK Network © 2026.
