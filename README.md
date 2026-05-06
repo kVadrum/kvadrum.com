@@ -15,4 +15,16 @@ Pure HTML/CSS/JS — no build step, no dependencies. Open `index.html` directly 
 - `images/kV-original.png` — lossless 1520px source logo
 - `images/kv-hero-001..004.jpg` — hero slideshow backgrounds
 
-KeMeK Network © 2026
+## License
+
+This repository is dual-licensed:
+
+- **Code** (HTML, CSS, JavaScript in `index.html`) — [MIT](./LICENSE).
+- **Content** (this README, the visible copy in `index.html`, the
+  hero photography in `images/kv-hero-*.jpg`) —
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Trademarks** — the "kVadrum" name and the kV monogram
+  (`images/kV.png`, `images/kV-original.png`) are not licensed.
+  See [`LICENSE`](./LICENSE) for the trademark note.
+
+Copyright © 2026 KeMeK Network.
