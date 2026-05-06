@@ -301,10 +301,11 @@
             gap: 16px;
             min-width: 0;
         }
-        /* The kV.png asset is white-on-black; sepia + saturate + hue-rotate
-           shifts the bright pixels toward phosphor green to match the rest
-           of the palette, while a drop-shadow halo lives in the same
-           family as the live status dot, kicker pip, and crosshair. */
+        /* The kV.png asset is the canonical brand mark — used unchanged
+           everywhere else (kemek.com, GitHub, signatures). On this site
+           we keep its identity intact and integrate via a phosphor
+           drop-shadow halo only — the *environment* picks up the site
+           accent, the mark itself does not. */
         .brand-mark {
             position: relative;
             display: inline-flex;
@@ -331,22 +332,16 @@
             object-fit: contain;
             display: block;
             filter:
-                brightness(0.94)
-                contrast(1.08)
-                sepia(0.55)
-                saturate(3.8)
-                hue-rotate(38deg)
+                brightness(0.98)
+                contrast(1.04)
                 drop-shadow(0 0 10px rgba(184, 255, 60, 0.22));
             transition: filter 320ms ease, transform 320ms ease;
         }
         .brand-mark:hover img {
             filter:
-                brightness(1.02)
-                contrast(1.10)
-                sepia(0.65)
-                saturate(4.4)
-                hue-rotate(38deg)
-                drop-shadow(0 0 16px rgba(184, 255, 60, 0.42));
+                brightness(1.04)
+                contrast(1.06)
+                drop-shadow(0 0 18px rgba(184, 255, 60, 0.42));
         }
         .brand-tag {
             font-family: var(--mono);
@@ -992,7 +987,7 @@
                 </div>
                 <div class="strip-cell">
                     <span class="lbl">Ver</span>
-                    <span class="val mono">v1.2.0</span>
+                    <span class="val mono">v1.2.1</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">&copy;&nbsp;KeMeK&nbsp;Network</a>
