@@ -3,588 +3,991 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>kVadrum</title>
+    <title>kVadrum — All Signal</title>
+    <meta name="description" content="kVadrum — a lightweight dev lab for systems, prototyping, and controlled chaos. Part of KeMeK Network.">
+    <meta name="theme-color" content="#0a0d0c">
+    <meta property="og:title" content="kVadrum">
+    <meta property="og:description" content="A lightweight dev lab for systems, prototyping, and controlled chaos.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kvadrum.com">
+    <link rel="icon" type="image/png" href="/images/kV.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #070a10;
-            --fg: rgba(255, 255, 255, 0.94);
-            --muted: rgba(255, 255, 255, 0.7);
-            --hair: rgba(255, 255, 255, 0.12);
-            --glass: rgba(8, 10, 16, 0.16);
-            --glass2: rgba(8, 10, 16, 0.06);
-            --shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
-            --r: 18px;
+            --bg: #0a0d0c;
+            --bg-2: #0e1311;
+            --ink: #ecead8;
+            --ink-mid: #b6b4a3;
+            --ink-low: #74736a;
+            --ink-faint: #3f3f3a;
+            --line: rgba(236, 234, 216, 0.09);
+            --line-2: rgba(236, 234, 216, 0.16);
+            --line-3: rgba(236, 234, 216, 0.28);
+            --phosphor: #b8ff3c;
+            --phosphor-soft: rgba(184, 255, 60, 0.18);
+            --phosphor-trace: rgba(184, 255, 60, 0.55);
+            --amber: #ffb650;
+            --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+            --r: 4px;
+            --display: "Fraunces", "Times New Roman", Times, serif;
+            --body: "Spectral", "Georgia", "Times New Roman", serif;
+            --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             --mx: 0;
             --my: 0;
-            --fade-ms: 1400ms;
+            --cx: 50%;
+            --cy: 50%;
+            --fade-ms: 1600ms;
         }
-        * {
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
+
+        html,
         body {
             margin: 0;
-            background: var(--bg);
-            color: var(--fg);
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            padding: 0;
+            height: 100%;
         }
-        .kemek-link {
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--body);
+            font-weight: 400;
+            line-height: 1.5;
+            font-feature-settings: "ss01", "ss02";
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+            min-height: 100svh;
+        }
+
+        ::selection {
+            background: var(--phosphor);
+            color: var(--bg);
+        }
+
+        a {
             color: inherit;
             text-decoration: none;
-            opacity: 0.8;
-            letter-spacing: 0.02em;
-            transition: opacity 0.18s ease, text-shadow 0.18s ease, transform 0.18s ease;
-            position: relative;
         }
-        .kemek-link::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: -2px;
-            height: 1px;
-            background: currentColor;
-            opacity: 0.25;
-            transform: scaleX(0.25);
-            transform-origin: left;
-            transition: transform 0.22s ease, opacity 0.22s ease;
-        }
-        .kemek-link:hover {
-            opacity: 1;
-            text-shadow: 0 0 10px rgba(120, 220, 255, 0.35);
-        }
-        .kemek-link:hover::after {
-            opacity: 0.65;
-            transform: scaleX(1);
-        }
-        .kemek-link:active {
-            transform: translateY(1px);
-        }
-        .kemek-link:focus-visible {
-            outline: 2px solid rgba(120, 220, 255, 0.45);
-            outline-offset: 3px;
-            border-radius: 6px;
-        }
+
+        /* ============================================================
+           STAGE — full-viewport canvas with layered hero + chrome
+           ============================================================ */
+
         .stage {
-            height: 100vh;
             position: relative;
-            isolation: isolate;
+            width: 100%;
+            height: 100vh;
+            height: 100svh;
             overflow: hidden;
+            isolation: isolate;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
         }
-        .topbar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 4;
-            padding: calc(12px + env(safe-area-inset-top)) clamp(16px, 3vw, 40px) 0;
-            display: flex;
-            justify-content: flex-end;
-            pointer-events: none;
-        }
-        .topbar-right {
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: baseline;
-            gap: 10px;
-            padding: 8px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(0, 0, 0, 0.12);
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-        .topbar-clock {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 12px;
-            letter-spacing: 0.16em;
-            color: rgba(255, 255, 255, 0.86);
-            text-shadow: 0 22px 70px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.62);
-        }
-        .topbar-tz {
-            font-size: 11px;
-            letter-spacing: 0.22em;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-        }
-        .hero-media {
+
+        /* Hero image stack */
+        .hero {
             position: absolute;
             inset: 0;
-            z-index: -4;
+            z-index: -10;
             overflow: hidden;
         }
-        .hero-layer {
+        .hero-img {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
+            object-position: center 38%;
             opacity: 0;
-            transform: translate3d(calc(var(--mx) * -10px), calc(var(--my) * -10px), 0) scale(1.05);
-            filter: saturate(1.07) contrast(1.05);
-            transition: opacity var(--fade-ms) ease, transform 0.22s ease;
+            transform: translate3d(calc(var(--mx) * -8px), calc(var(--my) * -6px), 0) scale(1.04);
+            filter: saturate(0.72) contrast(1.06) brightness(0.78);
+            transition: opacity var(--fade-ms) ease;
             will-change: opacity, transform;
         }
-        .hero-layer.is-on {
+        .hero-img.is-on {
             opacity: 1;
         }
-        .hero-overlay {
+
+        /* Color wash layered over hero — pulls toward green/black */
+        .hero::after {
+            content: "";
             position: absolute;
             inset: 0;
-            z-index: -3;
-            background: radial-gradient(1100px 640px at 22% 28%, rgba(20, 200, 255, 0.14), transparent 58%),
-                        radial-gradient(900px 620px at 82% 34%, rgba(140, 90, 255, 0.12), transparent 60%),
-                        linear-gradient(180deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.16) 44%, rgba(0, 0, 0, 0.76));
+            background:
+                radial-gradient(140% 80% at 50% 0%, rgba(10, 13, 12, 0.05), rgba(10, 13, 12, 0.65) 70%, rgba(10, 13, 12, 0.92) 100%),
+                radial-gradient(120% 90% at 100% 100%, rgba(10, 30, 18, 0.55), transparent 60%),
+                linear-gradient(180deg, rgba(10, 13, 12, 0.4) 0%, rgba(10, 13, 12, 0.0) 30%, rgba(10, 13, 12, 0.0) 60%, rgba(10, 13, 12, 0.85) 100%);
             pointer-events: none;
+            z-index: 1;
         }
+
+        /* Cursor-tracking instrument hairlines (horizontal + vertical).
+           Subtle phosphor crosshair, screen-blended so it only brightens
+           the dark backdrop. Faded out unless the cursor is over the
+           stage. Replaces the earlier radial-glow flashlight. */
+        .hair {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+            background: rgba(184, 255, 60, 0.16);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 260ms ease;
+            will-change: opacity;
+        }
+        .hair-h {
+            left: 0;
+            right: 0;
+            height: 1px;
+            top: var(--cy, 50%);
+        }
+        .hair-v {
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            left: var(--cx, 50%);
+        }
+        .hair::before {
+            content: "";
+            position: absolute;
+            background: rgba(184, 255, 60, 0.34);
+            filter: blur(0.5px);
+        }
+        .hair-h::before {
+            left: calc(var(--cx, 50%) - 32px);
+            width: 64px;
+            top: 0;
+            height: 1px;
+        }
+        .hair-v::before {
+            top: calc(var(--cy, 50%) - 32px);
+            height: 64px;
+            left: 0;
+            width: 1px;
+        }
+        .stage:hover .hair,
+        .stage.is-active .hair {
+            opacity: 1;
+        }
+
+        /* Subtle CRT scanlines on the hero */
+        .scanlines {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0px,
+                rgba(255, 255, 255, 0) 2px,
+                rgba(0, 0, 0, 0.18) 3px,
+                rgba(0, 0, 0, 0.0) 4px
+            );
+            opacity: 0.32;
+            mix-blend-mode: multiply;
+        }
+
+        /* Film grain */
         .grain {
             position: absolute;
             inset: -40px;
-            z-index: -2;
+            z-index: 4;
             pointer-events: none;
-            opacity: 0.075;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E");
             background-size: 220px 220px;
             mix-blend-mode: overlay;
         }
-        .content {
-            height: 100%;
-            display: grid;
-            place-items: center;
-            padding: clamp(16px, 3vw, 40px);
+
+        /* Decorative rule lines that frame the page */
+        .frame-rule {
+            position: absolute;
+            background: var(--line);
+            z-index: 5;
+            pointer-events: none;
         }
-        .panel {
-            width: min(980px, 100%);
-            border-radius: var(--r);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: linear-gradient(180deg, var(--glass), var(--glass2));
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            overflow: hidden;
-            position: relative;
-            max-height: calc(100vh - (2 * clamp(16px, 3vw, 40px)));
+        .frame-rule.top    { top: 56px; left: 0; right: 0; height: 1px; }
+        .frame-rule.bot    { bottom: 56px; left: 0; right: 0; height: 1px; }
+        .frame-rule.left   { left: 56px; top: 0; bottom: 0; width: 1px; }
+        .frame-rule.right  { right: 56px; top: 0; bottom: 0; width: 1px; }
+
+        /* Corner ticks */
+        .tick {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            z-index: 6;
+            pointer-events: none;
         }
-        .panel::before {
+        .tick::before,
+        .tick::after {
             content: "";
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(620px 240px at 18% 12%, rgba(255, 255, 255, 0.07), transparent 60%);
-            opacity: 0.95;
+            background: var(--line-3);
         }
-        .panel-inner {
-            padding: clamp(18px, 3.4vw, 34px);
-            display: grid;
-            grid-template-columns: 1.25fr 0.75fr;
-            gap: clamp(16px, 3vw, 26px);
-            align-items: start;
-        }
-        .panel-head {
+        .tick::before { top: 0; left: 0; width: 12px; height: 1px; }
+        .tick::after  { top: 0; left: 0; width: 1px; height: 12px; }
+        .tick.tl { top: 50px;    left: 50px; }
+        .tick.tr { top: 50px;    right: 50px; transform: scaleX(-1); }
+        .tick.bl { bottom: 50px; left: 50px;  transform: scaleY(-1); }
+        .tick.br { bottom: 50px; right: 50px; transform: scale(-1, -1); }
+
+        /* ============================================================
+           TOP FRAME — wordmark + status
+           ============================================================ */
+
+        .frame-top {
+            position: relative;
+            z-index: 10;
+            padding: 18px clamp(28px, 5vw, 80px) 14px;
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: inline-flex;
             align-items: center;
             gap: 14px;
-            margin: 0 0 14px;
+            min-width: 0;
         }
-        .logo {
-            width: 84px;
-            height: 84px;
-            border-radius: 24px;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(0, 0, 0, 0.12);
-            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
-            flex: 0 0 auto;
+        .brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--line-2);
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
-        .logo::after {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            pointer-events: none;
-            background: radial-gradient(44px 44px at 28% 28%, rgba(20, 200, 255, 0.22), transparent 62%),
-                        radial-gradient(52px 52px at 74% 56%, rgba(140, 90, 255, 0.18), transparent 66%);
-            mix-blend-mode: screen;
-            opacity: 0.9;
-        }
-        .logo img {
-            width: 100%;
-            height: 100%;
+        .brand-mark img {
+            width: 26px;
+            height: 26px;
             object-fit: contain;
             display: block;
-            filter: saturate(1.04) contrast(1.03);
+            filter: brightness(1.06) contrast(1.04);
         }
-        .logo-fallback {
-            position: absolute;
-            inset: 0;
+        .brand-text {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 1px;
+            line-height: 1;
+        }
+        .brand-name {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+        .brand-tag {
+            font-family: var(--mono);
+            font-size: 9.5px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--ink-low);
+        }
+
+        .frame-top-r {
+            display: inline-flex;
+            align-items: center;
+            gap: 18px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--ink-mid);
+        }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--phosphor);
+            box-shadow:
+                0 0 0 2px rgba(184, 255, 60, 0.12),
+                0 0 12px rgba(184, 255, 60, 0.7);
+            animation: pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.45; }
+        }
+        .frame-top .sep {
+            color: var(--ink-faint);
+        }
+
+        /* ============================================================
+           MAIN — masthead + telemetry sidebar
+           ============================================================ */
+
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: clamp(20px, 3vw, 32px) clamp(28px, 5vw, 80px);
             display: grid;
-            place-items: center;
-            font-weight: 850;
-            letter-spacing: -0.05em;
-            font-size: 32px;
-            color: rgba(255, 255, 255, 0.92);
-            text-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
-            background: radial-gradient(42px 42px at 30% 30%, rgba(20, 200, 255, 0.16), transparent 62%),
-                        radial-gradient(52px 52px at 70% 56%, rgba(140, 90, 255, 0.14), transparent 68%),
-                        rgba(0, 0, 0, 0.08);
+            grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+            gap: clamp(28px, 5vw, 64px);
+            align-items: stretch;
+            min-height: 0;
         }
-        .brandblock {
+
+        .masthead {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            justify-content: center;
             min-width: 0;
+            opacity: 0;
+            animation: lift 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms forwards;
         }
-        .brandblock .name {
-            font-weight: 850;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            font-size: 20px;
-            opacity: 0.96;
-            text-shadow: 0 22px 70px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(0, 0, 0, 0.55);
+        @keyframes lift {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        h1 {
-            margin: 0 0 10px;
-            font-size: clamp(34px, 5vw, 64px);
-            line-height: 1.02;
-            letter-spacing: -0.02em;
-            text-wrap: balance;
-            text-shadow: 0 22px 70px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(0, 0, 0, 0.52);
-        }
-        .tag {
-            color: rgba(255, 255, 255, 0.76);
-            font-size: 14px;
-            line-height: 1.6;
-            max-width: 62ch;
-            margin: 0 0 14px;
-            text-shadow: 0 22px 70px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.62);
-        }
-        .wordage {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+
+        .kicker {
+            display: inline-flex;
             align-items: center;
-            margin-top: 8px;
-            color: rgba(255, 255, 255, 0.76);
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: 0.34em;
+            text-transform: uppercase;
+            color: var(--ink-mid);
+            margin-bottom: clamp(20px, 3vw, 30px);
         }
-        .chip {
-            font-size: 12px;
-            padding: 7px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(0, 0, 0, 0.1);
+        .kicker-pip {
+            width: 6px;
+            height: 6px;
+            background: var(--phosphor);
+            box-shadow: 0 0 10px rgba(184, 255, 60, 0.85);
+        }
+        .kicker .vol {
+            color: var(--ink-low);
+        }
+
+        h1.display {
+            margin: 0 0 clamp(20px, 3vw, 28px);
+            font-family: var(--display);
+            font-weight: 320;
+            font-variation-settings: "opsz" 144, "SOFT" 25;
+            font-size: clamp(56px, 11vw, 168px);
+            line-height: 0.92;
+            letter-spacing: -0.035em;
+            color: var(--ink);
+            text-wrap: balance;
+        }
+        h1.display em {
+            font-style: italic;
+            font-variation-settings: "opsz" 144, "SOFT" 100;
+            color: var(--ink);
+        }
+        /* word-cycle: container width is fixed by an invisible "ghost"
+           word equal to the longest entry. Visible words are
+           absolutely positioned over the ghost so swapping them never
+           reflows the headline (and thus never moves the right column).
+           Each word includes its trailing period so the punctuation
+           sticks to the text, regardless of word length. */
+        .word-cycle {
+            position: relative;
+            display: inline-block;
+            vertical-align: baseline;
+            white-space: nowrap;
+            font-style: italic;
+            font-weight: 380;
+            font-variation-settings: "opsz" 144, "SOFT" 80;
+            color: var(--phosphor);
+            text-shadow: 0 0 30px rgba(184, 255, 60, 0.22);
+        }
+        .word-cycle .ws-ghost {
+            visibility: hidden;
+            pointer-events: none;
             user-select: none;
-            text-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 1px rgba(0, 0, 0, 0.6);
+            display: inline-block;
+            white-space: nowrap;
         }
-        .chip.wide {
-            letter-spacing: 0.22em;
-            padding: 7px 12px;
+        .word-cycle .ws {
+            position: absolute;
+            left: 0;
+            top: 0;
+            white-space: nowrap;
+            will-change: opacity, transform, filter;
+            transition: opacity 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                        transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                        filter 420ms ease;
         }
+        .word-cycle .ws.is-out {
+            opacity: 0;
+            transform: translateY(-0.16em);
+            filter: blur(4px);
+        }
+        .word-cycle .ws.is-in {
+            opacity: 0;
+            transform: translateY(0.18em);
+            filter: blur(5px);
+        }
+
+        .lede {
+            margin: 0 0 clamp(22px, 3vw, 30px);
+            font-family: var(--body);
+            font-weight: 400;
+            font-size: clamp(15px, 1.35vw, 18px);
+            line-height: 1.55;
+            color: var(--ink-mid);
+            max-width: 46ch;
+        }
+        .lede em {
+            font-style: italic;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
         .cta {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
-            margin-top: 14px;
         }
         .btn {
-            appearance: none;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            background: rgba(0, 0, 0, 0.14);
-            color: var(--fg);
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 13px;
-            text-decoration: none;
+            position: relative;
             display: inline-flex;
-            gap: 10px;
             align-items: center;
-            transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-            will-change: transform;
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-            border-color: rgba(255, 255, 255, 0.26);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        .btn.primary {
-            background: linear-gradient(135deg, rgba(20, 200, 255, 0.16), rgba(140, 90, 255, 0.12));
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .aside {
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            padding-left: clamp(14px, 2.6vw, 22px);
-            display: flex;
-            flex-direction: column;
             gap: 12px;
-            min-width: 0;
-        }
-        .meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-        .tile {
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 14px;
-            padding: 10px 10px 11px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
-            min-width: 0;
-        }
-        .tile b {
-            display: block;
-            font-size: 12px;
-            letter-spacing: 0.08em;
+            padding: 11px 18px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.24em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.84);
-            margin-bottom: 6px;
-            text-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 1px rgba(0, 0, 0, 0.6);
+            color: var(--ink);
+            border: 1px solid var(--line-2);
+            background: rgba(10, 13, 12, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 1px;
+            transition: border-color 180ms ease, color 180ms ease, background 180ms ease, transform 180ms ease;
+            overflow: hidden;
         }
-        .tile div {
-            font-size: 12px;
-            line-height: 1.35;
-            color: rgba(255, 255, 255, 0.72);
-            text-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 1px rgba(0, 0, 0, 0.6);
-            word-break: break-word;
-        }
-        footer {
+        .btn::before {
+            content: "";
             position: absolute;
-            left: clamp(16px, 3vw, 40px);
-            right: clamp(16px, 3vw, 40px);
-            bottom: 16px;
-            color: rgba(255, 255, 255, 0.54);
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            z-index: 3;
-            text-shadow: 0 22px 70px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.62);
+            inset: 0;
+            background: linear-gradient(110deg, transparent 30%, rgba(184, 255, 60, 0.12) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
             pointer-events: none;
         }
-        footer::before {
+        .btn:hover {
+            color: var(--phosphor);
+            border-color: var(--phosphor-trace);
+            background: rgba(10, 13, 12, 0.55);
+        }
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+        .btn:active {
+            transform: translateY(1px);
+        }
+        .btn .arr {
+            font-size: 13px;
+            transition: transform 180ms ease;
+        }
+        .btn:hover .arr {
+            transform: translateX(2px);
+        }
+        .btn.primary {
+            color: var(--phosphor);
+            border-color: var(--phosphor-trace);
+            background: rgba(184, 255, 60, 0.06);
+        }
+        .btn.primary:hover {
+            background: rgba(184, 255, 60, 0.12);
+            color: var(--phosphor);
+        }
+        .btn:focus-visible {
+            outline: 1px solid var(--phosphor);
+            outline-offset: 3px;
+        }
+
+        /* Telemetry sidebar */
+        .telemetry {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 14px;
+            min-width: 0;
+            border-left: 1px solid var(--line);
+            padding-left: clamp(20px, 3vw, 36px);
+        }
+        .tile {
+            position: relative;
+            padding: 14px 16px 16px;
+            border: 1px solid var(--line);
+            background: rgba(10, 13, 12, 0.32);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 1px;
+            opacity: 0;
+            transform: translateX(12px);
+            animation: tilein 700ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+            animation-delay: calc(360ms + var(--i) * 90ms);
+            transition: border-color 220ms ease, background 220ms ease;
+        }
+        .tile::before {
             content: "";
-            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 18px;
+            height: 1px;
+            background: var(--phosphor);
+            opacity: 0.0;
+            transition: opacity 220ms ease, width 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
         }
-        @media (max-width: 860px) {
-            .panel-inner {
-                grid-template-columns: 1fr;
-            }
-            .aside {
-                border-left: 0;
-                padding-left: 0;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding-top: 14px;
-            }
-            .logo {
-                width: 74px;
-                height: 74px;
-                border-radius: 22px;
-            }
-            .meta {
-                grid-template-columns: 1fr;
-            }
+        .tile:hover {
+            border-color: var(--line-2);
+            background: rgba(10, 13, 12, 0.5);
         }
-        @media (max-width: 860px), (max-height: 620px) {
-            html {
-                height: 100%;
-                overflow: hidden;
-            }
-            body {
-                height: 100%;
-                overflow-y: auto;
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-            }
+        .tile:hover::before {
+            opacity: 1;
+            width: 36px;
+        }
+        @keyframes tilein {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .tile-h {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .tile-no {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--ink-low);
+        }
+        .tile-l {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+        .tile-b {
+            font-family: var(--body);
+            font-size: 13.5px;
+            line-height: 1.45;
+            color: var(--ink-mid);
+        }
+        .tile-b .arr {
+            color: var(--phosphor);
+            font-family: var(--mono);
+            padding: 0 4px;
+            opacity: 0.85;
+        }
+        .tile-b em {
+            font-style: italic;
+            color: var(--ink);
+        }
+
+        /* ============================================================
+           BOTTOM STRIP — UTC clock, oscilloscope, uplink, copyright
+           ============================================================ */
+
+        .frame-bottom {
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(10, 13, 12, 0) 0%, rgba(10, 13, 12, 0.35) 100%);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+        .strip {
+            display: grid;
+            grid-template-columns: minmax(0, 1.0fr) minmax(0, 1.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr);
+            align-items: center;
+            gap: 0;
+            padding: 0 clamp(28px, 5vw, 80px);
+        }
+        .strip-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-right: 1px solid var(--line);
+            min-width: 0;
+        }
+        .strip-cell:first-child {
+            padding-right: clamp(14px, 2vw, 22px);
+        }
+        .strip-cell:not(:first-child) {
+            padding: 14px clamp(14px, 2vw, 22px);
+        }
+        .strip-cell:last-child {
+            border-right: 0;
+            justify-content: flex-end;
+            padding-right: 0;
+        }
+        .lbl {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--ink-low);
+            flex: 0 0 auto;
+        }
+        .val {
+            color: var(--ink);
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mono {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.12em;
+        }
+
+        .scope {
+            flex: 1 1 auto;
+            height: 22px;
+            min-width: 0;
+            display: block;
+            color: var(--phosphor);
+            overflow: hidden;
+        }
+        .scope path {
+            fill: none;
+            stroke: var(--phosphor);
+            stroke-width: 1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 1.5px rgba(184, 255, 60, 0.5));
+            shape-rendering: geometricPrecision;
+        }
+        .scope .grid {
+            stroke: rgba(184, 255, 60, 0.08);
+            stroke-width: 0.5;
+            stroke-dasharray: 2 3;
+            filter: none;
+        }
+
+        .kn {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--ink-mid);
+            position: relative;
+            transition: color 180ms ease;
+        }
+        .kn::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px;
+            height: 1px;
+            background: currentColor;
+            transform: scaleX(0.0);
+            transform-origin: left;
+            transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+        }
+        .kn:hover {
+            color: var(--phosphor);
+        }
+        .kn:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* ============================================================
+           RESPONSIVE — collapse to a stacked, scrollable column
+           ============================================================ */
+
+        @media (max-width: 960px), (max-height: 680px) {
+            html, body { overflow: visible; }
+            body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
             .stage {
                 height: auto;
-                min-height: 100%;
-                overflow: visible;
+                min-height: 100svh;
+                grid-template-rows: auto auto auto;
             }
-            .hero-media, .hero-overlay, .grain {
+            .hero, .scanlines, .grain, .hair {
                 position: fixed;
                 inset: 0;
-                pointer-events: none;
             }
-            .grain {
-                inset: -40px;
-            }
-            .hero-media {
-                z-index: 0;
-            }
-            .hero-overlay {
-                z-index: 1;
-            }
-            .grain {
-                z-index: 2;
-            }
+            .hair-h { left: 0; right: 0; height: 1px; bottom: auto; }
+            .hair-v { top: 0; bottom: 0; width: 1px; right: auto; }
+            .grain { inset: -40px; }
+            .frame-rule, .tick { display: none; }
             .content {
-                position: relative;
-                z-index: 3;
+                grid-template-columns: 1fr;
+                gap: 28px;
+                padding-top: clamp(18px, 4vw, 30px);
+                padding-bottom: clamp(18px, 4vw, 30px);
             }
-            .topbar {
-                position: fixed;
-                left: 0;
-                right: 0;
-                z-index: 5;
+            .telemetry {
+                border-left: 0;
+                padding-left: 0;
+                border-top: 1px solid var(--line);
+                padding-top: 24px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
-            footer {
-                position: fixed;
-                left: clamp(16px, 3vw, 40px);
-                right: clamp(16px, 3vw, 40px);
-                bottom: calc(12px + env(safe-area-inset-bottom));
-                z-index: 5;
-                pointer-events: auto;
-                isolation: isolate;
+            h1.display {
+                font-size: clamp(48px, 13vw, 88px);
             }
-            footer::before {
-                display: block;
-                content: "";
-                position: absolute;
-                left: calc(-1 * clamp(16px, 3vw, 40px));
-                right: calc(-1 * clamp(16px, 3vw, 40px));
-                bottom: calc(-12px - env(safe-area-inset-bottom));
-                height: calc(38px + env(safe-area-inset-bottom));
-                pointer-events: none;
-                z-index: -1;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.22) 30%, rgba(0, 0, 0, 0.56) 100%);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+            .strip {
+                grid-template-columns: 1fr 1fr;
+                padding: 0 clamp(16px, 4vw, 24px);
             }
-            .content {
-                height: auto;
-                padding-left: clamp(16px, 3vw, 40px);
-                padding-right: clamp(16px, 3vw, 40px);
-                padding-top: calc(clamp(16px, 3vw, 40px) + 56px + env(safe-area-inset-top));
-                padding-bottom: calc(clamp(16px, 3vw, 40px) + 88px + env(safe-area-inset-bottom));
+            .strip-cell {
+                padding: 10px 0;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
             }
-            .panel {
-                max-height: none;
+            .strip-cell:nth-child(2n) {
+                padding-left: 14px;
             }
-            .topbar-clock {
-                font-size: 11px;
-                letter-spacing: 0.1em;
+            .strip-cell:last-child {
+                border-bottom: 0;
+                justify-content: flex-end;
+                padding-right: 0;
             }
         }
+
+        @media (max-width: 540px) {
+            .telemetry {
+                grid-template-columns: 1fr;
+            }
+            .frame-top {
+                padding: 14px clamp(16px, 4vw, 24px) 8px;
+            }
+            .frame-top-r {
+                gap: 12px;
+                font-size: 10px;
+            }
+            .frame-top-r .sep,
+            .frame-top-r .uplink-label {
+                display: none;
+            }
+            .strip {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .hero-layer {
-                transition: none;
-                transform: none;
+            .hero-img,
+            .word-cycle .ws,
+            .tile,
+            .masthead,
+            .btn,
+            .btn::before,
+            .btn .arr,
+            .kn::after,
+            .tile::before,
+            .status-dot {
+                animation: none !important;
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+                filter: none !important;
             }
-            .btn {
-                transition: none;
-            }
+            .hero-img.is-on { opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="stage" id="stage">
-        <div class="hero-media">
-            <img id="heroA" class="hero-layer is-on" src="/images/kv-hero-001.jpg" alt="">
-            <img id="heroB" class="hero-layer" src="/images/kv-hero-001.jpg" alt="">
+        <!-- Hero image stack -->
+        <div class="hero">
+            <img id="heroA" class="hero-img is-on" src="/images/kv-hero-001.jpg" alt="" decoding="async">
+            <img id="heroB" class="hero-img" src="/images/kv-hero-001.jpg" alt="" decoding="async">
         </div>
-        <div class="hero-overlay"></div>
+        <div class="scanlines"></div>
         <div class="grain"></div>
+        <div class="hair hair-h" aria-hidden="true"></div>
+        <div class="hair hair-v" aria-hidden="true"></div>
 
-        <div class="topbar">
-            <div class="topbar-right">
-                <div class="topbar-clock" id="time-utc">00.00.0000 00:00:00</div>
-                <div class="topbar-tz">UTC</div>
+        <!-- Frame ornaments -->
+        <div class="frame-rule top"></div>
+        <div class="frame-rule bot"></div>
+        <div class="frame-rule left"></div>
+        <div class="frame-rule right"></div>
+        <span class="tick tl"></span>
+        <span class="tick tr"></span>
+        <span class="tick bl"></span>
+        <span class="tick br"></span>
+
+        <!-- Top frame -->
+        <header class="frame-top">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <img src="/images/kV.png" alt="">
+                </span>
+                <span class="brand-text">
+                    <span class="brand-name">kVadrum</span>
+                    <span class="brand-tag">TX&middot;001 / Poseidon</span>
+                </span>
             </div>
-        </div>
+            <div class="frame-top-r">
+                <span class="status">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span>Transmitting</span>
+                </span>
+                <span class="sep">/</span>
+                <span class="uplink-label">kvadrum.com</span>
+            </div>
+        </header>
 
-        <div class="content">
-            <div class="panel">
-                <div class="panel-inner">
-                    <div>
-                        <div class="panel-head">
-                            <div class="logo">
-                                <img src="/images/kV.png" alt="kVadrum logo">
-                                <div class="logo-fallback">kV</div>
-                            </div>
-                            <div class="brandblock">
-                                <div class="name">kV</div>
-                                <div class="tag" style="margin: 0; font-size: 12px; color: rgba(255, 255, 255, 0.6);">kVadrum</div>
-                            </div>
-                        </div>
-                        <h1>all signal.</h1>
-                        <p class="tag">A lightweight dev lab for systems, prototyping, and controlled chaos.</p>
-                        <p class="tag" style="font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Entity Configuration.</p>
-                        <div class="cta">
-                            <a href="https://kemek.com/prime" class="btn primary">Enter&rarr;</a>
-                            <a href="https://github.com/kemeknetwork" class="btn">Repo&nearr;</a>
-                            <a href="https://kemek.com/prime/contact/" class="btn">Contact&bull;</a>
-                        </div>
-                        <div class="wordage">
-                            <span class="chip wide">EXPERIMENTAL</span>
-                            <span class="chip wide">CODEBASE</span>
-                        </div>
+        <!-- Main content -->
+        <main class="content">
+            <section class="masthead">
+                <div class="kicker">
+                    <span class="kicker-pip" aria-hidden="true"></span>
+                    <span>kVadrum dispatch</span>
+                    <span class="vol">— vol. 01</span>
+                </div>
+                <h1 class="display">
+                    all <span class="word-cycle" id="cycle"><span class="ws-ghost" aria-hidden="true">kVadrum.</span><span class="ws is-on">signal.</span></span>
+                </h1>
+                <p class="lede">
+                    A lightweight dev lab for systems, prototyping, and
+                    <em>controlled chaos</em>. We sketch, we sharpen, we ship —
+                    minimal ceremony, maximum momentum.
+                </p>
+                <div class="cta">
+                    <a class="btn primary" href="https://kemek.com/prime">
+                        <span>Enter</span>
+                        <span class="arr" aria-hidden="true">&rarr;</span>
+                    </a>
+                    <a class="btn" href="https://github.com/kvadrum" target="_blank" rel="noopener">
+                        <span>GitHub</span>
+                        <span class="arr" aria-hidden="true">&nearr;</span>
+                    </a>
+                    <a class="btn" href="https://kemek.com/prime/contact/">
+                        <span>Contact</span>
+                        <span class="arr" aria-hidden="true">&middot;</span>
+                    </a>
+                </div>
+            </section>
+
+            <aside class="telemetry" aria-label="kVadrum telemetry">
+                <div class="tile" style="--i:0">
+                    <div class="tile-h">
+                        <span class="tile-no">01</span>
+                        <span class="tile-l">Focus</span>
                     </div>
+                    <div class="tile-b">AI &middot; dev tooling &middot; systems &middot; crypto infra</div>
+                </div>
+                <div class="tile" style="--i:1">
+                    <div class="tile-h">
+                        <span class="tile-no">02</span>
+                        <span class="tile-l">Mode</span>
+                    </div>
+                    <div class="tile-b">prototype <span class="arr">&rarr;</span> harden <span class="arr">&rarr;</span> ship</div>
+                </div>
+                <div class="tile" style="--i:2">
+                    <div class="tile-h">
+                        <span class="tile-no">03</span>
+                        <span class="tile-l">Status</span>
+                    </div>
+                    <div class="tile-b">placeholder &middot; <em>MMXXVI</em></div>
+                </div>
+                <div class="tile" style="--i:3">
+                    <div class="tile-h">
+                        <span class="tile-no">04</span>
+                        <span class="tile-l">Signal</span>
+                    </div>
+                    <div class="tile-b">minimal ceremony &middot; maximum momentum</div>
+                </div>
+            </aside>
+        </main>
 
-                    <aside class="aside">
-                        <div class="meta">
-                            <div class="tile">
-                                <b>Focus</b>
-                                <div>AI &bull; dev tooling &bull; systems &bull; crypto infra</div>
-                            </div>
-                            <div class="tile">
-                                <b>Mode</b>
-                                <div>prototype &rarr; harden &rarr; ship</div>
-                            </div>
-                            <div class="tile">
-                                <b>Status</b>
-                                <div>placeholder &bull; 2026</div>
-                            </div>
-                            <div class="tile">
-                                <b>Signal</b>
-                                <div>minimal ceremony &bull; maximum momentum</div>
-                            </div>
-                        </div>
-                    </aside>
+        <!-- Bottom strip -->
+        <footer class="frame-bottom">
+            <div class="strip">
+                <div class="strip-cell">
+                    <span class="lbl">UTC</span>
+                    <span class="val mono" id="time-utc">--.--.----  --:--:--</span>
+                </div>
+                <div class="strip-cell">
+                    <span class="lbl">Sig</span>
+                    <svg class="scope" id="scope" viewBox="0 0 200 24" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="grid" d="M0 12 L200 12" />
+                        <path id="scope-line" d="M0 12 L200 12" />
+                    </svg>
+                </div>
+                <div class="strip-cell">
+                    <span class="lbl">Uplink</span>
+                    <span class="val mono">kvadrum.com</span>
+                </div>
+                <div class="strip-cell">
+                    <a href="https://kemek.network" class="kn">&copy;&nbsp;KeMeK&nbsp;Network</a>
                 </div>
             </div>
-        </div>
-
-        <footer>
-            <div>&copy; <a href="https://kemek.network" class="kemek-link">KeMeK Network</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;kVadrum</div>
-            <div>Onward &amp; Upward</div>
         </footer>
     </div>
 
     <script>
-        // Hero drift
+        // ----------------------------------------------------------
+        // Mouse parallax + cursor-tracking glow
+        // ----------------------------------------------------------
         (function () {
             var stage = document.getElementById("stage");
             if (!stage) return;
-            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-            var raf = 0, tx = 0, ty = 0;
+            var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduceMotion) return;
+            var raf = 0, tx = 0, ty = 0, cx = 50, cy = 50;
             function onMove(e) {
                 var r = stage.getBoundingClientRect();
-                tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-                ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+                var nx = (e.clientX - r.left) / r.width;
+                var ny = (e.clientY - r.top) / r.height;
+                tx = (nx - 0.5) * 2;
+                ty = (ny - 0.5) * 2;
+                cx = nx * 100;
+                cy = ny * 100;
                 if (!raf) {
                     raf = requestAnimationFrame(function () {
                         raf = 0;
                         stage.style.setProperty("--mx", Math.max(-1, Math.min(1, tx)).toFixed(3));
                         stage.style.setProperty("--my", Math.max(-1, Math.min(1, ty)).toFixed(3));
+                        stage.style.setProperty("--cx", cx.toFixed(2) + "%");
+                        stage.style.setProperty("--cy", cy.toFixed(2) + "%");
                     });
                 }
             }
             window.addEventListener("mousemove", onMove, { passive: true });
+            window.addEventListener("touchmove", function (e) {
+                if (!e.touches || !e.touches[0]) return;
+                onMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+            }, { passive: true });
         })();
     </script>
 
     <script>
-        // Hero crossfade slideshow
+        // ----------------------------------------------------------
+        // Hero crossfade slideshow (kept from v1.0.0, slowed)
+        // ----------------------------------------------------------
         (function () {
             var A = document.getElementById("heroA");
             var B = document.getElementById("heroB");
@@ -599,15 +1002,15 @@
             ];
             if (HEROES.length <= 1) return;
 
-            var HOLD_MS = 12000;
-            var FADE_MS = 1400;
+            var HOLD_MS = 16000;
+            var FADE_MS = 1600;
 
-            function shuffle(arr) {
-                for (var i = arr.length - 1; i > 0; i--) {
+            function shuffle(a) {
+                for (var i = a.length - 1; i > 0; i--) {
                     var j = (Math.random() * (i + 1)) | 0;
-                    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+                    var t = a[i]; a[i] = a[j]; a[j] = t;
                 }
-                return arr;
+                return a;
             }
 
             var first = A.getAttribute("src") || HEROES[0];
@@ -621,7 +1024,9 @@
             function pickNext() {
                 if (pool.length > 2) shuffle(pool);
                 var next = pool[(idx + 1) % pool.length];
-                if (next === (topIsA ? A.src : B.src)) next = pool[(idx + 2) % pool.length] || next;
+                if (next === (topIsA ? A.src : B.src)) {
+                    next = pool[(idx + 2) % pool.length] || next;
+                }
                 idx = pool.indexOf(next);
                 if (idx < 0) idx = 0;
                 return next;
@@ -666,16 +1071,23 @@
     </script>
 
     <script>
-        // Live UTC clock
+        // ----------------------------------------------------------
+        // Live UTC clock — formatted as YYYY.MM.DD  HH:MM:SS
+        // ----------------------------------------------------------
         (function () {
             var el = document.getElementById("time-utc");
             if (!el) return;
-            function pad2(n) { return (n < 10 ? "0" : "") + n; }
+            function p(n) { return (n < 10 ? "0" : "") + n; }
             var t = 0;
             function render() {
                 var d = new Date();
-                el.textContent = pad2(d.getUTCMonth() + 1) + "." + pad2(d.getUTCDate()) + "." + d.getUTCFullYear()
-                    + " " + pad2(d.getUTCHours()) + ":" + pad2(d.getUTCMinutes()) + ":" + pad2(d.getUTCSeconds());
+                el.textContent =
+                    d.getUTCFullYear() + "." +
+                    p(d.getUTCMonth() + 1) + "." +
+                    p(d.getUTCDate()) + "  " +
+                    p(d.getUTCHours()) + ":" +
+                    p(d.getUTCMinutes()) + ":" +
+                    p(d.getUTCSeconds());
             }
             function schedule() {
                 t = setTimeout(function () { render(); schedule(); }, 1000 - new Date().getMilliseconds());
@@ -685,6 +1097,205 @@
             document.addEventListener("visibilitychange", function () {
                 if (document.hidden) { clearTimeout(t); t = 0; }
                 else { render(); schedule(); }
+            }, { passive: true });
+        })();
+    </script>
+
+    <script>
+        // ----------------------------------------------------------
+        // Headline word cycler — italicizes a single word, swaps every ~5.5s
+        // ----------------------------------------------------------
+        (function () {
+            var host = document.getElementById("cycle");
+            if (!host) return;
+            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+            var WORDS = ["signal.", "systems.", "kVadrum."];
+            var idx = 0, busy = false;
+
+            function swap() {
+                if (busy) return;
+                busy = true;
+                var current = host.querySelector(".ws");
+                idx = (idx + 1) % WORDS.length;
+                var next = document.createElement("span");
+                next.className = "ws is-in";
+                next.textContent = WORDS[idx];
+                host.appendChild(next);
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        next.classList.remove("is-in");
+                    });
+                });
+                if (current) {
+                    current.classList.add("is-out");
+                    setTimeout(function () {
+                        if (current.parentNode === host) host.removeChild(current);
+                    }, 460);
+                }
+                setTimeout(function () { busy = false; }, 500);
+            }
+
+            var timer = 0;
+            function schedule() {
+                timer = setTimeout(function tick() {
+                    swap();
+                    timer = setTimeout(tick, 5500);
+                }, 5500);
+            }
+            schedule();
+            document.addEventListener("visibilitychange", function () {
+                if (document.hidden) { clearTimeout(timer); timer = 0; }
+                else if (!timer) schedule();
+            }, { passive: true });
+        })();
+    </script>
+
+    <script>
+        // ----------------------------------------------------------
+        // Oscilloscope sparkline — interactive readout.
+        //   • idle: gentle sin/cos drift, rAF-paced (smooth at 60fps)
+        //   • mouse motion: builds "energy" from cursor velocity →
+        //     amplitude + phase speed climb; exponential decay so it
+        //     coasts down naturally (frame-rate independent).
+        //   • click: bumps energy AND injects a pulse that travels
+        //     right→left across the scope (~1.6s lifetime).
+        //   • soft tanh clamp keeps the trace inside the SVG box.
+        // ----------------------------------------------------------
+        (function () {
+            var line = document.getElementById("scope-line");
+            if (!line) return;
+            var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            var W = 200, H = 24, MID = H / 2;
+            var N = 80;                  // smoother curve at 60fps
+            var phase = 0;
+            var BASE_RATE = 1.6;         // rad/sec at idle
+            var ENERGY_RATE_K = 0.32;    // additional rad/sec per energy unit
+            var DECAY_TAU = 720;         // ms — energy halves in ~500ms
+
+            var ampBase = 3.2;
+            var ampGain = 0.30;          // amp boost per energy unit
+            var ampMax = 4.0;            // cap for amp boost
+            var harmonic = 0.42;         // secondary sine ratio
+            var noiseAmp = 0.32;
+            var pulsePeak = 5.5;
+            var maxDev = 9.5;            // ± from MID — keeps trace inside frame
+
+            var energy = 0;
+            var lastMoveX = 0, lastMoveY = 0, lastMoveT = 0;
+            var pulses = [];
+            var PULSE_LIFE_MS = 1600;
+
+            function now() { return (typeof performance !== "undefined") ? performance.now() : Date.now(); }
+
+            function pumpEnergy(dx, dy, dt) {
+                var v = Math.sqrt(dx * dx + dy * dy) / Math.max(1, dt);  // px/ms
+                energy = Math.min(22, energy + v * 1.3);
+            }
+            function onMove(e) {
+                var t = now();
+                if (lastMoveT) pumpEnergy(e.clientX - lastMoveX, e.clientY - lastMoveY, t - lastMoveT);
+                lastMoveX = e.clientX; lastMoveY = e.clientY; lastMoveT = t;
+            }
+            function onClick() {
+                energy = Math.min(28, energy + 10);
+                pulses.push({ start: now() });
+                if (pulses.length > 8) pulses.shift();
+            }
+            function onTouchMove(e) {
+                if (e.touches && e.touches[0]) onMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+            }
+
+            window.addEventListener("mousemove", onMove, { passive: true });
+            window.addEventListener("touchmove", onTouchMove, { passive: true });
+            window.addEventListener("click", onClick, { passive: true });
+            window.addEventListener("touchstart", function () { onClick(); }, { passive: true });
+
+            function tanhSoftClamp(v, lim) {
+                // Smooth saturating clamp that asymptotes to ±lim.
+                var x = v / lim;
+                // Approx tanh — Padé-style, ~1.5x faster than Math.tanh for tight
+                // inner loops. Accurate to ~0.001 in [-3, 3] which covers our range.
+                var x2 = x * x;
+                return lim * x * (27 + x2) / (27 + 9 * x2);
+            }
+
+            var lastFrameT = 0;
+            var rafId = 0;
+
+            function frame(t) {
+                if (!lastFrameT) { lastFrameT = t; rafId = requestAnimationFrame(frame); return; }
+                var dt = t - lastFrameT;
+                lastFrameT = t;
+                // Cap dt to avoid huge jumps after tab regains focus
+                if (dt > 80) dt = 80;
+
+                // Time-based exponential decay
+                energy *= Math.exp(-dt / DECAY_TAU);
+                if (energy < 0.02) energy = 0;
+
+                // Phase advances at rate (rad/sec) → multiply by dt seconds
+                var rate = BASE_RATE + energy * ENERGY_RATE_K;
+                phase += rate * (dt / 1000);
+
+                var amp = ampBase + Math.min(ampMax, energy * ampGain);
+
+                // Prune expired pulses
+                if (pulses.length) {
+                    var nowT = t;
+                    var alive = [];
+                    for (var k = 0; k < pulses.length; k++) {
+                        if (nowT - pulses[k].start < PULSE_LIFE_MS) alive.push(pulses[k]);
+                    }
+                    pulses = alive;
+                }
+
+                var pts = "";
+                for (var i = 0; i < N; i++) {
+                    var x = (i / (N - 1)) * W;
+                    var u = i * 0.34 + phase;
+                    var dev = Math.sin(u) * amp
+                            + Math.sin(u * 0.41 + 1.7) * (amp * harmonic)
+                            + Math.sin(u * 1.93) * noiseAmp;
+
+                    if (pulses.length) {
+                        for (var pi = 0; pi < pulses.length; pi++) {
+                            var p = pulses[pi];
+                            var age = (t - p.start) / 1000;            // seconds
+                            var prog = age / (PULSE_LIFE_MS / 1000);   // 0 → 1
+                            var pulseX = W - prog * W;                 // travels right→left
+                            var dx = x - pulseX;
+                            var fade = 1 - prog;
+                            var sigma = 5.5;
+                            var spike = pulsePeak * fade * fade * Math.exp(-(dx * dx) / (2 * sigma * sigma));
+                            dev -= spike * Math.sin(age * 22);          // oscillating blip
+                        }
+                    }
+
+                    var y = MID + tanhSoftClamp(dev, maxDev);
+                    pts += (i === 0 ? "M" : " L") + x.toFixed(2) + " " + y.toFixed(2);
+                }
+                line.setAttribute("d", pts);
+
+                rafId = requestAnimationFrame(frame);
+            }
+
+            if (reduce) {
+                // Single static frame — no animation
+                frame(now());
+                return;
+            }
+
+            rafId = requestAnimationFrame(frame);
+            document.addEventListener("visibilitychange", function () {
+                if (document.hidden) {
+                    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+                    lastFrameT = 0;
+                    lastMoveT = 0;
+                } else if (!rafId) {
+                    rafId = requestAnimationFrame(frame);
+                }
             }, { passive: true });
         })();
     </script>
