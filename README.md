@@ -15,9 +15,4 @@ Pure HTML/CSS/JS — no build step, no dependencies. Open `index.html` directly 
 - `images/kV-original.png` — lossless 1520px source logo
 - `images/kv-hero-001..004.jpg` — hero slideshow backgrounds
 
-## Repo Policy
-
-- Active work on `dev`
-- `dev` → `main` only after explicit approval
-
 KeMeK Network © 2026

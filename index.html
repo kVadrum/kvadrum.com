@@ -258,47 +258,63 @@
         .brand {
             display: inline-flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
             min-width: 0;
         }
+        /* The kV.png asset is white-on-black; sepia + saturate + hue-rotate
+           shifts the bright pixels toward phosphor green to match the rest
+           of the palette, while a drop-shadow halo lives in the same
+           family as the live status dot, kicker pip, and crosshair. */
         .brand-mark {
+            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--line-2);
-            border-radius: 2px;
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            width: clamp(44px, 5.5vw, 56px);
+            height: clamp(44px, 5.5vw, 56px);
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 0 0 auto;
+            isolation: isolate;
+        }
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            box-shadow: inset 0 0 0 1px rgba(184, 255, 60, 0.10);
         }
         .brand-mark img {
-            width: 26px;
-            height: 26px;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             display: block;
-            filter: brightness(1.06) contrast(1.04);
+            filter:
+                brightness(0.94)
+                contrast(1.08)
+                sepia(0.55)
+                saturate(3.8)
+                hue-rotate(38deg)
+                drop-shadow(0 0 10px rgba(184, 255, 60, 0.22));
+            transition: filter 320ms ease, transform 320ms ease;
         }
-        .brand-text {
-            display: inline-flex;
-            flex-direction: column;
-            gap: 1px;
-            line-height: 1;
-        }
-        .brand-name {
-            font-family: var(--mono);
-            font-size: 11px;
-            letter-spacing: 0.32em;
-            text-transform: uppercase;
-            color: var(--ink);
+        .brand-mark:hover img {
+            filter:
+                brightness(1.02)
+                contrast(1.10)
+                sepia(0.65)
+                saturate(4.4)
+                hue-rotate(38deg)
+                drop-shadow(0 0 16px rgba(184, 255, 60, 0.42));
         }
         .brand-tag {
             font-family: var(--mono);
-            font-size: 9.5px;
-            letter-spacing: 0.4em;
+            font-size: 10.5px;
+            letter-spacing: 0.36em;
             text-transform: uppercase;
-            color: var(--ink-low);
+            color: var(--ink-mid);
+            line-height: 1.2;
         }
 
         .frame-top-r {
@@ -841,13 +857,10 @@
         <!-- Top frame -->
         <header class="frame-top">
             <div class="brand">
-                <span class="brand-mark" aria-hidden="true">
-                    <img src="/images/kV.png" alt="">
+                <span class="brand-mark">
+                    <img src="/images/kV.png" alt="kVadrum">
                 </span>
-                <span class="brand-text">
-                    <span class="brand-name">kVadrum</span>
-                    <span class="brand-tag">TX&middot;001 / Poseidon</span>
-                </span>
+                <span class="brand-tag">TX&middot;001 / Poseidon</span>
             </div>
             <div class="frame-top-r">
                 <span class="status">
@@ -897,21 +910,21 @@
                         <span class="tile-no">01</span>
                         <span class="tile-l">Focus</span>
                     </div>
-                    <div class="tile-b">AI &middot; dev tooling &middot; systems &middot; crypto infra</div>
+                    <div class="tile-b">agentic dev &middot; tools &middot; systems &middot; infra</div>
                 </div>
                 <div class="tile" style="--i:1">
                     <div class="tile-h">
                         <span class="tile-no">02</span>
                         <span class="tile-l">Mode</span>
                     </div>
-                    <div class="tile-b">prototype <span class="arr">&rarr;</span> harden <span class="arr">&rarr;</span> ship</div>
+                    <div class="tile-b">build: prototype <span class="arr">&rarr;</span> harden <span class="arr">&rarr;</span> ship</div>
                 </div>
                 <div class="tile" style="--i:2">
                     <div class="tile-h">
                         <span class="tile-no">03</span>
                         <span class="tile-l">Status</span>
                     </div>
-                    <div class="tile-b">placeholder &middot; <em>MMXXVI</em></div>
+                    <div class="tile-b">onward/upward &middot; MMXXVI</div>
                 </div>
                 <div class="tile" style="--i:3">
                     <div class="tile-h">
@@ -938,8 +951,8 @@
                     </svg>
                 </div>
                 <div class="strip-cell">
-                    <span class="lbl">Uplink</span>
-                    <span class="val mono">kvadrum.com</span>
+                    <span class="lbl">Ver</span>
+                    <span class="val mono">v1.1.1</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">&copy;&nbsp;KeMeK&nbsp;Network</a>
@@ -986,7 +999,11 @@
 
     <script>
         // ----------------------------------------------------------
-        // Hero crossfade slideshow (kept from v1.0.0, slowed)
+        // Hero crossfade slideshow — random non-repeating queue.
+        //   Each pass through HEROES visits every image exactly once
+        //   in a random order; on refill, the just-shown image is
+        //   bumped out of the first slot so cycles never repeat back
+        //   to back.
         // ----------------------------------------------------------
         (function () {
             var A = document.getElementById("heroA");
@@ -1013,24 +1030,31 @@
                 return a;
             }
 
-            var first = A.getAttribute("src") || HEROES[0];
-            var pool = shuffle(HEROES.slice());
-            var idx = pool.indexOf(first);
-            if (idx < 0) idx = 0;
-            A.src = pool[idx] || first;
-            B.src = A.src;
-            var topIsA = true, timer = 0, inFlight = false;
+            var queue = [];
+            var lastSrc = null;
+
+            function refill() {
+                queue = shuffle(HEROES.slice());
+                // If the freshly-shuffled queue would replay the just-shown
+                // image as the very next pick, swap it back one slot.
+                if (queue.length > 1 && queue[0] === lastSrc) {
+                    var t = queue[0]; queue[0] = queue[1]; queue[1] = t;
+                }
+            }
 
             function pickNext() {
-                if (pool.length > 2) shuffle(pool);
-                var next = pool[(idx + 1) % pool.length];
-                if (next === (topIsA ? A.src : B.src)) {
-                    next = pool[(idx + 2) % pool.length] || next;
-                }
-                idx = pool.indexOf(next);
-                if (idx < 0) idx = 0;
+                if (!queue.length) refill();
+                var next = queue.shift();
+                lastSrc = next;
                 return next;
             }
+
+            // Prime: random first image, both layers point at it
+            refill();
+            var firstSrc = pickNext();
+            A.src = firstSrc;
+            B.src = firstSrc;
+            var topIsA = true, timer = 0, inFlight = false;
 
             function preload(src, cb) {
                 var im = new Image();
@@ -1044,7 +1068,7 @@
                 inFlight = true;
                 var nextSrc = pickNext();
                 preload(nextSrc, function (ok) {
-                    if (!ok) nextSrc = pickNext();
+                    if (!ok) nextSrc = pickNext();   // skip broken entry, advance queue
                     var top = topIsA ? A : B;
                     var bot = topIsA ? B : A;
                     bot.src = nextSrc;
