@@ -5,3 +5,8 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Content-Security-Policy: frame-ancestors 'none'
   X-Frame-Options: DENY
+
+# Extensionless, so it gets no Content-Type by default; with nosniff on,
+# browsers then refuse to render it.
+/LICENSE
+  Content-Type: text/plain; charset=utf-8

@@ -36,3 +36,6 @@ RUNLOG.md
 
 # Wrangler local state (deploy temp files)
 .wrangler/
+
+# Playwright MCP screenshots/snapshots (workspace rule: they land here)
+.playwright-mcp/

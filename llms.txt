@@ -9,13 +9,12 @@ kvadrum.com is currently a single-page placeholder; the fuller web presence is s
 The name is written **kVadrum**: lowercase "k", capital "V", one word.
 Not "Kvadrum", "KVadrum" or "K-Vadrum".
 
+Site code is MIT-licensed; site copy and hero photography are CC BY 4.0.
+The "kVadrum" name and the kV monogram are not licensed: KeMeK Network reserves all rights in them.
+
 ## Links
 
 - [kVadrum on GitHub](https://github.com/kvadrum): kVadrum's public repositories
 - [KeMeK Network](https://kemek.network): the network kVadrum is part of
 - [Contact](https://kemek.com/prime/contact/): get in touch
-
-## Licensing
-
-- Site code: MIT. Site copy and hero photography: CC BY 4.0.
-- The "kVadrum" name and the kV monogram are not licensed; all rights reserved.
+- [License](https://kvadrum.com/LICENSE): full license terms for this site
