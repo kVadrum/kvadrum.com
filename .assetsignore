@@ -1,0 +1,12 @@
+# ALLOWLIST — the assets directory is the repo root, which also holds
+# local-only files (STATE.md, CLAUDE.md, .claude/, brand/). A local
+# `wrangler deploy` uploads whatever is on disk, so ignore everything and
+# name what ships: a new private file then fails closed, not public.
+*
+!index.html
+!LICENSE
+!images/
+!images/*
+
+# Lossless source logo — kept in the repo, never served.
+images/kV-original.png

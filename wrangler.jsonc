@@ -1,0 +1,10 @@
+// Cloudflare Workers static-assets site — no Worker script, no build step.
+// Deploy from the repo root: `npx wrangler deploy` (KeMeK account).
+// What ships is decided by .assetsignore, which is an allowlist.
+{
+  "name": "kvadrum",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "."
+  }
+}
