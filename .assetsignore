@@ -5,6 +5,9 @@
 *
 !index.html
 !LICENSE
+!robots.txt
+!sitemap.xml
+!llms.txt
 !images/
 !images/*
 

@@ -1,0 +1,21 @@
+# kVadrum
+
+> kVadrum is a lightweight dev lab for systems, prototyping, and controlled chaos. Part of KeMeK Network.
+
+kVadrum works on agentic development, developer tools, systems, and infrastructure.
+The working mode is prototype → harden → ship: minimal ceremony, maximum momentum.
+kvadrum.com is currently a single-page placeholder; the fuller web presence is still to come.
+
+The name is written **kVadrum**: lowercase "k", capital "V", one word.
+Not "Kvadrum", "KVadrum" or "K-Vadrum".
+
+## Links
+
+- [kVadrum on GitHub](https://github.com/kvadrum): kVadrum's public repositories
+- [KeMeK Network](https://kemek.network): the network kVadrum is part of
+- [Contact](https://kemek.com/prime/contact/): get in touch
+
+## Licensing
+
+- Site code: MIT. Site copy and hero photography: CC BY 4.0.
+- The "kVadrum" name and the kV monogram are not licensed; all rights reserved.

@@ -1,0 +1,6 @@
+# kvadrum.com — every crawler is welcome, AI crawlers included.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+Sitemap: https://kvadrum.com/sitemap.xml
