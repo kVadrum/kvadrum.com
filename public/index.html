@@ -49,7 +49,7 @@
     <!-- Type fixtures -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Cloudflare Web Analytics — privacy-friendly, cookieless pageview/perf beacon -->
     <script defer
         src="https://static.cloudflareinsights.com/beacon.min.js"
@@ -60,7 +60,7 @@
             --bg-2: #0e1311;
             --ink: #ecead8;
             --ink-mid: #b6b4a3;
-            --ink-low: #74736a;
+            --ink-low: #8f8e83;          /* ≥ 4.5:1 on --bg and on the glass tiles: it sets 10px labels */
             --ink-faint: #3f3f3a;
             --line: rgba(236, 234, 216, 0.09);
             --line-2: rgba(236, 234, 216, 0.16);
@@ -79,6 +79,9 @@
             --cx: 50%;
             --cy: 50%;
             --fade-ms: 1600ms;
+            /* One side gutter for the top bar, content and footer strip, so
+               their left edges stay on one rail at every width. */
+            --gutter: clamp(28px, 5vw, 80px);
         }
 
         *,
@@ -214,9 +217,12 @@
             left: 0;
             width: 1px;
         }
-        .stage:hover .hair,
-        .stage.is-active .hair {
-            opacity: 1;
+        /* Hover-capable pointers only: on touch, :hover sticks after a tap
+           and would leave the crosshair drawn across the content. */
+        @media (hover: hover) and (pointer: fine) {
+            .stage:hover .hair {
+                opacity: 1;
+            }
         }
 
         /* Subtle CRT scanlines on the hero */
@@ -288,7 +294,7 @@
         .frame-top {
             position: relative;
             z-index: 10;
-            padding: 18px clamp(28px, 5vw, 80px) 14px;
+            padding: 18px var(--gutter) 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -341,20 +347,12 @@
                 0 0 12px rgba(184, 255, 60, 0.30),
                 0 0 28px rgba(184, 255, 60, 0.14);
         }
+        /* No filter on the img itself: the mark's pixels stay canonical. */
         .brand-mark img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
-            filter:
-                brightness(0.98)
-                contrast(1.04);
-            transition: filter 320ms ease, transform 320ms ease;
-        }
-        .brand-mark:hover img {
-            filter:
-                brightness(1.04)
-                contrast(1.06);
         }
         .brand-tag {
             font-family: var(--mono);
@@ -363,6 +361,7 @@
             text-transform: uppercase;
             color: var(--ink-mid);
             line-height: 1.2;
+            white-space: nowrap;
         }
 
         .frame-top-r {
@@ -405,7 +404,7 @@
         .content {
             position: relative;
             z-index: 10;
-            padding: clamp(20px, 3vw, 32px) clamp(28px, 5vw, 80px);
+            padding: clamp(20px, 3vw, 32px) var(--gutter);
             display: grid;
             grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
             gap: clamp(28px, 5vw, 64px);
@@ -426,16 +425,27 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* Kicker and lede sit straight on the photograph: a soft ink halo
+           keeps them legible over its brightest streaks, and vanishes
+           against the dark parts. */
+        .kicker,
+        .lede {
+            text-shadow: 0 1px 14px rgba(10, 13, 12, 0.85);
+        }
         .kicker {
             display: inline-flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 10px;
+            gap: 6px 10px;
             font-family: var(--mono);
             font-size: 10.5px;
             letter-spacing: 0.34em;
             text-transform: uppercase;
             color: var(--ink-mid);
             margin-bottom: clamp(20px, 3vw, 30px);
+        }
+        .kicker > span {
+            white-space: nowrap;
         }
         .kicker-pip {
             width: 6px;
@@ -452,16 +462,11 @@
             font-family: var(--display);
             font-weight: 320;
             font-variation-settings: "opsz" 144, "SOFT" 25;
-            font-size: clamp(56px, 11vw, 168px);
+            font-size: clamp(56px, 11vw, 196px);
             line-height: 0.92;
             letter-spacing: -0.035em;
             color: var(--ink);
             text-wrap: balance;
-        }
-        h1.display em {
-            font-style: italic;
-            font-variation-settings: "opsz" 144, "SOFT" 100;
-            color: var(--ink);
         }
         /* word-cycle: container width is fixed by an invisible "ghost"
            word equal to the longest entry. Visible words are
@@ -474,6 +479,8 @@
             display: inline-block;
             vertical-align: baseline;
             white-space: nowrap;
+            /* The italic's first stroke leans back into the roman "all". */
+            margin-left: 0.05em;
             font-style: italic;
             font-weight: 380;
             font-variation-settings: "opsz" 144, "SOFT" 80;
@@ -517,10 +524,10 @@
             color: var(--ink-mid);
             max-width: 46ch;
         }
+        /* 400: Spectral's italic is loaded at 400 only; 500 was a faux bold. */
         .lede em {
             font-style: italic;
             color: var(--ink);
-            font-weight: 500;
         }
 
         .cta {
@@ -596,6 +603,11 @@
             justify-content: center;
             gap: 14px;
             min-width: 0;
+            /* Capped so ultrawide screens don't stretch one-line tiles into
+               bars; held against the right frame edge. */
+            width: 100%;
+            max-width: 560px;
+            justify-self: end;
             border-left: 1px solid var(--line);
             padding-left: clamp(20px, 3vw, 36px);
         }
@@ -685,10 +697,12 @@
         }
         .strip {
             display: grid;
-            grid-template-columns: minmax(0, 1.0fr) minmax(0, 1.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr);
+            /* Readouts take their own width; the scope takes the rest, so
+               the clock never truncates on narrow desktops. */
+            grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
             align-items: center;
             gap: 0;
-            padding: 0 clamp(28px, 5vw, 80px);
+            padding: 0 var(--gutter);
         }
         .strip-cell {
             display: flex;
@@ -787,12 +801,15 @@
            ============================================================ */
 
         @media (max-width: 960px), (max-height: 680px) {
+            :root { --gutter: clamp(18px, 5vw, 40px); }
             html, body { overflow: visible; }
             body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+            /* Slack goes to the content row (centred in it), never to the
+               top bar or the footer. */
             .stage {
                 height: auto;
                 min-height: 100svh;
-                grid-template-rows: auto auto auto;
+                grid-template-rows: auto 1fr auto;
             }
             .hero, .scanlines, .grain, .hair {
                 position: fixed;
@@ -802,13 +819,21 @@
             .hair-v { top: 0; bottom: 0; width: 1px; right: auto; }
             .grain { inset: -40px; }
             .frame-rule, .tick { display: none; }
+            /* Text scrolls over the brightest parts of the fixed photograph
+               here, so the grade runs darker than on the framed desktop. */
+            .hero-img {
+                filter: saturate(0.72) contrast(1.06) brightness(0.6);
+            }
             .content {
                 grid-template-columns: 1fr;
+                align-content: center;
                 gap: 28px;
                 padding-top: clamp(18px, 4vw, 30px);
                 padding-bottom: clamp(18px, 4vw, 30px);
             }
             .telemetry {
+                max-width: none;
+                justify-self: stretch;
                 border-left: 0;
                 padding-left: 0;
                 border-top: 1px solid var(--line);
@@ -820,11 +845,16 @@
             h1.display {
                 font-size: clamp(48px, 13vw, 88px);
             }
+            /* Two columns: left cells sit on the gutter rail, right cells
+               get an inset; only the last row loses its rule. Selectors
+               match the base rules' specificity so these win by order. */
             .strip {
                 grid-template-columns: 1fr 1fr;
-                padding: 0 clamp(16px, 4vw, 24px);
             }
-            .strip-cell {
+            .strip-cell,
+            .strip-cell:not(:first-child),
+            .strip-cell:first-child,
+            .strip-cell:last-child {
                 padding: 10px 0;
                 border-right: 0;
                 border-bottom: 1px solid var(--line);
@@ -832,10 +862,8 @@
             .strip-cell:nth-child(2n) {
                 padding-left: 14px;
             }
-            .strip-cell:last-child {
+            .strip-cell:nth-last-child(-n+2) {
                 border-bottom: 0;
-                justify-content: flex-end;
-                padding-right: 0;
             }
         }
 
@@ -844,7 +872,13 @@
                 grid-template-columns: 1fr;
             }
             .frame-top {
-                padding: 14px clamp(16px, 4vw, 24px) 8px;
+                padding: 14px var(--gutter) 8px;
+            }
+            .brand {
+                gap: 12px;
+            }
+            .brand-tag {
+                letter-spacing: 0.22em;
             }
             .frame-top-r {
                 gap: 12px;
@@ -854,29 +888,53 @@
             .frame-top-r .uplink-label {
                 display: none;
             }
+            /* Primary action spans the row; the two secondary ones share
+               the next, instead of a third button wrapping alone. */
+            .cta {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+            .btn {
+                justify-content: space-between;
+            }
+            .btn.primary {
+                grid-column: 1 / -1;
+            }
             .strip {
                 grid-template-columns: 1fr;
             }
+            .strip-cell:nth-child(2n) {
+                padding-left: 0;
+            }
+            .strip-cell:nth-last-child(2) {
+                border-bottom: 1px solid var(--line);
+            }
+            .strip-cell:last-child {
+                justify-content: flex-start;
+            }
         }
 
+        @media (max-width: 374px) {
+            .brand-tag {
+                white-space: normal;
+            }
+        }
+
+        /* Reduced motion removes motion, not end states: entrances land
+           already in place, hover effects switch instead of sweeping, and
+           the hero keeps its grade. */
         @media (prefers-reduced-motion: reduce) {
-            .hero-img,
-            .word-cycle .ws,
-            .tile,
-            .masthead,
-            .btn,
-            .btn::before,
-            .btn .arr,
-            .kn::after,
-            .tile::before,
-            .status-dot {
+            *,
+            *::before,
+            *::after {
                 animation: none !important;
                 transition: none !important;
-                opacity: 1 !important;
-                transform: none !important;
-                filter: none !important;
             }
-            .hero-img.is-on { opacity: 1; }
+            .masthead,
+            .tile {
+                opacity: 1;
+                transform: none;
+            }
         }
     </style>
 </head>
@@ -1000,7 +1058,7 @@
                 </div>
                 <div class="strip-cell">
                     <span class="lbl">Ver</span>
-                    <span class="val mono">v1.3.2</span>
+                    <span class="val mono">v1.3.3</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">KeMeK&nbsp;Network&nbsp;&copy;&nbsp;2026</a>
