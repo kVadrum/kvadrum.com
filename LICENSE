@@ -12,25 +12,25 @@ What is code, what is content
 -----------------------------
 
 Code (MIT):
-  * index.html — the HTML structure, embedded CSS, and embedded
+  * public/index.html — the HTML structure, embedded CSS, and embedded
     JavaScript that drives the page (interaction logic, animation
     code, layout system).
 
 Content (CC BY 4.0):
   * README.md
-  * llms.txt
-  * The visible textual copy embedded in index.html (headlines,
+  * public/llms.txt
+  * The visible textual copy embedded in public/index.html (headlines,
     telemetry tile labels and bodies, brand tag, kicker, button
     labels, footer attribution).
-  * images/kv-hero-001.jpg
-  * images/kv-hero-002.jpg
-  * images/kv-hero-003.jpg
-  * images/kv-hero-004.jpg
+  * public/images/kv-hero-001.jpg
+  * public/images/kv-hero-002.jpg
+  * public/images/kv-hero-003.jpg
+  * public/images/kv-hero-004.jpg
 
 Names and logos (NOT licensed):
   * The "kVadrum" name.
-  * images/kV.png  — the kV monogram, current optimized 512px asset.
-  * images/kV-original.png — the lossless 1520px source for the same
+  * public/images/kV.png — the kV monogram, current optimized 512px asset.
+  * source/kV-original.png — the lossless 1520px source for the same
     monogram.
 
 
@@ -82,8 +82,8 @@ Suggested attribution:
 Names and logos (NOT licensed)
 ================================================================
 
-The "kVadrum" name and the kV monogram (images/kV.png and
-images/kV-original.png) are not covered by either of the licenses
+The "kVadrum" name and the kV monogram (public/images/kV.png and
+source/kV-original.png) are not covered by either of the licenses
 above. KeMeK Network reserves all rights in them. Independent forks
 must replace the name and the kV monogram with their own before
 publishing or distributing the result.

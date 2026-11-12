@@ -1,0 +1,4 @@
+# The assets directory holds only public files (fleet rule, docs/infra/fleet.md).
+# This file is a backstop: never serve dotfiles (.DS_Store, editor droppings).
+# A future .well-known/ (security.txt) needs a `!.well-known/` line below.
+.*
