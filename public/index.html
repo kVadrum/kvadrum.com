@@ -1000,7 +1000,7 @@
                 </div>
                 <div class="strip-cell">
                     <span class="lbl">Ver</span>
-                    <span class="val mono">v1.3.1</span>
+                    <span class="val mono">v1.3.2</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">KeMeK&nbsp;Network&nbsp;&copy;&nbsp;2026</a>
@@ -1010,14 +1010,17 @@
     </div>
 
     <script>
+        // One script, so reduced motion is decided once. Each section stays
+        // an IIFE that returns early when its element is missing: one bad
+        // markup edit must not throw and take the other sections down.
+        var REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
         // ----------------------------------------------------------
-        // Mouse parallax + cursor-tracking glow
+        // Mouse parallax + cursor-tracking hairlines
         // ----------------------------------------------------------
         (function () {
             var stage = document.getElementById("stage");
-            if (!stage) return;
-            var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            if (reduceMotion) return;
+            if (!stage || REDUCE) return;
             var raf = 0, tx = 0, ty = 0, cx = 50, cy = 50;
             function onMove(e) {
                 var r = stage.getBoundingClientRect();
@@ -1038,26 +1041,20 @@
                 }
             }
             window.addEventListener("mousemove", onMove, { passive: true });
-            window.addEventListener("touchmove", function (e) {
-                if (!e.touches || !e.touches[0]) return;
-                onMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-            }, { passive: true });
+            window.addEventListener("touchmove", function (e) { onMove(e.touches[0]); }, { passive: true });
         })();
-    </script>
 
-    <script>
         // ----------------------------------------------------------
         // Hero crossfade slideshow — random non-repeating queue.
         //   Each pass through HEROES visits every image exactly once
         //   in a random order; on refill, the just-shown image is
         //   bumped out of the first slot so cycles never repeat back
-        //   to back.
+        //   to back. The fade is CSS (--fade-ms); JS only flips .is-on.
         // ----------------------------------------------------------
         (function () {
             var A = document.getElementById("heroA");
             var B = document.getElementById("heroB");
-            if (!A || !B) return;
-            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            if (!A || !B || REDUCE) return;
 
             var HEROES = [
                 "/images/kv-hero-001.jpg",
@@ -1065,10 +1062,7 @@
                 "/images/kv-hero-003.jpg",
                 "/images/kv-hero-004.jpg"
             ];
-            if (HEROES.length <= 1) return;
-
             var HOLD_MS = 16000;
-            var FADE_MS = 1600;
 
             function shuffle(a) {
                 for (var i = a.length - 1; i > 0; i--) {
@@ -1078,45 +1072,30 @@
                 return a;
             }
 
-            var queue = [];
-            var lastSrc = null;
-
-            function refill() {
-                queue = shuffle(HEROES.slice());
-                // If the freshly-shuffled queue would replay the just-shown
-                // image as the very next pick, swap it back one slot.
-                if (queue.length > 1 && queue[0] === lastSrc) {
-                    var t = queue[0]; queue[0] = queue[1]; queue[1] = t;
-                }
-            }
-
+            var queue = [], lastSrc = null;
             function pickNext() {
-                if (!queue.length) refill();
-                var next = queue.shift();
-                lastSrc = next;
-                return next;
+                if (!queue.length) {
+                    queue = shuffle(HEROES.slice());
+                    if (queue[0] === lastSrc) {
+                        var t = queue[0]; queue[0] = queue[1]; queue[1] = t;
+                    }
+                }
+                lastSrc = queue.shift();
+                return lastSrc;
             }
 
             // Prime: random first image, both layers point at it
-            refill();
-            var firstSrc = pickNext();
-            A.src = firstSrc;
-            B.src = firstSrc;
-            var topIsA = true, timer = 0, inFlight = false;
+            A.src = B.src = pickNext();
+            var topIsA = true, timer = 0, loading = false;
 
-            function preload(src, cb) {
-                var im = new Image();
-                im.onload = function () { cb(true); };
-                im.onerror = function () { cb(false); };
-                im.src = src;
-            }
-
+            // `loading` spans only the preload, which on a slow link can
+            // outlast HOLD_MS; the next swap waits for it, not for the fade.
             function swap() {
-                if (inFlight) return;
-                inFlight = true;
+                if (loading) return;
+                loading = true;
                 var nextSrc = pickNext();
-                preload(nextSrc, function (ok) {
-                    if (!ok) nextSrc = pickNext();   // skip broken entry, advance queue
+                var im = new Image();
+                im.onload = function () {
                     var top = topIsA ? A : B;
                     var bot = topIsA ? B : A;
                     bot.src = nextSrc;
@@ -1124,120 +1103,95 @@
                         bot.classList.add("is-on");
                         top.classList.remove("is-on");
                         topIsA = !topIsA;
-                        setTimeout(function () { inFlight = false; }, FADE_MS + 50);
+                        loading = false;
                     });
-                });
+                };
+                // A broken image is skipped: the current one stays up.
+                im.onerror = function () { loading = false; };
+                im.src = nextSrc;
             }
 
-            function schedule() {
-                timer = setTimeout(function () { swap(); schedule(); }, HOLD_MS);
-            }
-
+            function start() { timer = setInterval(swap, HOLD_MS); }
             document.addEventListener("visibilitychange", function () {
-                if (document.hidden) { clearTimeout(timer); timer = 0; }
-                else if (!timer) schedule();
-            }, { passive: true });
-
-            schedule();
+                if (document.hidden) { clearInterval(timer); timer = 0; }
+                else if (!timer) start();
+            });
+            start();
         })();
-    </script>
 
-    <script>
         // ----------------------------------------------------------
-        // Live UTC clock — formatted as YYYY.MM.DD  HH:MM:SS
+        // Live UTC clock — YYYY.MM.DD  HH:MM:SS, ticking on the second
         // ----------------------------------------------------------
         (function () {
             var el = document.getElementById("time-utc");
             if (!el) return;
-            function p(n) { return (n < 10 ? "0" : "") + n; }
             var t = 0;
-            function render() {
-                var d = new Date();
-                el.textContent =
-                    d.getUTCFullYear() + "." +
-                    p(d.getUTCMonth() + 1) + "." +
-                    p(d.getUTCDate()) + "  " +
-                    p(d.getUTCHours()) + ":" +
-                    p(d.getUTCMinutes()) + ":" +
-                    p(d.getUTCSeconds());
+            function tick() {
+                el.textContent = new Date().toISOString().slice(0, 19).replace(/-/g, ".").replace("T", "  ");
+                t = setTimeout(tick, 1000 - Date.now() % 1000);
             }
-            function schedule() {
-                t = setTimeout(function () { render(); schedule(); }, 1000 - new Date().getMilliseconds());
-            }
-            render();
-            schedule();
             document.addEventListener("visibilitychange", function () {
-                if (document.hidden) { clearTimeout(t); t = 0; }
-                else { render(); schedule(); }
-            }, { passive: true });
+                clearTimeout(t);
+                if (!document.hidden) tick();
+            });
+            tick();
         })();
-    </script>
 
-    <script>
         // ----------------------------------------------------------
-        // Headline word cycler — italicizes a single word, swaps every ~5.5s
+        // Headline word cycler — swaps the italic word every 5.5s.
+        //   The outgoing word fades under CSS (.is-out) and is removed
+        //   at the next swap, so no JS delay has to match the CSS
+        //   transition; aria-hidden keeps it out of the heading's name.
         // ----------------------------------------------------------
         (function () {
             var host = document.getElementById("cycle");
-            if (!host) return;
-            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            if (!host || REDUCE) return;
 
             var WORDS = ["signal.", "systems.", "kVadrum."];
-            var idx = 0, busy = false;
+            var idx = 0, timer = 0;
 
             function swap() {
-                if (busy) return;
-                busy = true;
+                var gone = host.querySelector(".ws.is-out");
+                if (gone) host.removeChild(gone);
                 var current = host.querySelector(".ws");
+                current.classList.add("is-out");
+                current.setAttribute("aria-hidden", "true");
                 idx = (idx + 1) % WORDS.length;
                 var next = document.createElement("span");
                 next.className = "ws is-in";
                 next.textContent = WORDS[idx];
                 host.appendChild(next);
+                // Two frames: .is-in must be painted before removing it transitions.
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
                         next.classList.remove("is-in");
                     });
                 });
-                if (current) {
-                    current.classList.add("is-out");
-                    setTimeout(function () {
-                        if (current.parentNode === host) host.removeChild(current);
-                    }, 460);
-                }
-                setTimeout(function () { busy = false; }, 500);
             }
 
-            var timer = 0;
-            function schedule() {
-                timer = setTimeout(function tick() {
-                    swap();
-                    timer = setTimeout(tick, 5500);
-                }, 5500);
-            }
-            schedule();
+            function start() { timer = setInterval(swap, 5500); }
             document.addEventListener("visibilitychange", function () {
-                if (document.hidden) { clearTimeout(timer); timer = 0; }
-                else if (!timer) schedule();
-            }, { passive: true });
+                if (document.hidden) { clearInterval(timer); timer = 0; }
+                else if (!timer) start();
+            });
+            start();
         })();
-    </script>
 
-    <script>
         // ----------------------------------------------------------
         // Oscilloscope sparkline — interactive readout.
-        //   • idle: gentle sin/cos drift, rAF-paced (smooth at 60fps)
-        //   • mouse motion: builds "energy" from cursor velocity →
+        //   • at rest: a flat line, and the rAF loop is stopped.
+        //   • pointer motion: builds "energy" from cursor velocity →
         //     amplitude + phase speed climb; exponential decay so it
-        //     coasts down naturally (frame-rate independent).
-        //   • click: bumps energy AND injects a pulse that travels
+        //     coasts down naturally (frame-rate independent). Once
+        //     energy and pulses are both spent the loop stops again.
+        //   • press: bumps energy AND injects a pulse that travels
         //     right→left across the scope (~1.6s lifetime).
-        //   • soft tanh clamp keeps the trace inside the SVG box.
+        //   • tanh soft clamp keeps the trace inside the SVG box.
+        //   • reduced motion: the markup's static flat line, untouched.
         // ----------------------------------------------------------
         (function () {
             var line = document.getElementById("scope-line");
-            if (!line) return;
-            var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (!line || REDUCE) return;
 
             var W = 200, H = 24, MID = H / 2;
             var N = 80;                  // smoother curve at 60fps
@@ -1246,137 +1200,99 @@
             var ENERGY_RATE_K = 0.32;    // additional rad/sec per energy unit
             var DECAY_TAU = 720;         // ms — energy halves in ~500ms
 
-            // ampBase = 0: trace is a perfect flatline at rest. All
-            // amplitude and noise are gated on `energy`, which is fed
-            // only by mouse motion (cursor velocity). Faster motion →
-            // bigger excursions. Pulses (clicks) still inject visible
-            // spikes regardless of energy.
-            var ampBase = 0.0;
+            // All amplitude and noise are gated on `energy`, which is fed
+            // only by pointer motion (cursor velocity): faster motion →
+            // bigger excursions, and none at all at rest. Pulses (presses)
+            // inject visible spikes regardless of energy.
             var ampGain = 0.42;          // amp per energy unit
             var ampMax = 7.5;            // cap for amp from energy
             var harmonic = 0.42;         // secondary sine ratio
             var noiseAmp = 0.55;         // peak noise amplitude (scaled by energy)
             var noiseRamp = 4.0;         // energy units to reach full noise
             var pulsePeak = 5.5;
+            var pulseSigma = 5.5;
+            var PULSE_LIFE_MS = 1600;
             var maxDev = 9.5;            // ± from MID — keeps trace inside frame
 
-            var energy = 0;
+            // The x half of every path point never changes: build it once.
+            var XS = [];
+            for (var n = 0; n < N; n++) XS.push((n ? " L" : "M") + (n / (N - 1) * W).toFixed(2) + " ");
+
+            var energy = 0, pulses = [];
             var lastMoveX = 0, lastMoveY = 0, lastMoveT = 0;
-            var pulses = [];
-            var PULSE_LIFE_MS = 1600;
+            var lastFrameT = 0, rafId = 0;
 
-            function now() { return (typeof performance !== "undefined") ? performance.now() : Date.now(); }
-
+            function wake() {
+                if (!rafId) rafId = requestAnimationFrame(frame);
+            }
             function pumpEnergy(dx, dy, dt) {
                 var v = Math.sqrt(dx * dx + dy * dy) / Math.max(1, dt);  // px/ms
                 energy = Math.min(22, energy + v * 1.3);
+                wake();
             }
             function onMove(e) {
-                var t = now();
+                var t = performance.now();
                 if (lastMoveT) pumpEnergy(e.clientX - lastMoveX, e.clientY - lastMoveY, t - lastMoveT);
                 lastMoveX = e.clientX; lastMoveY = e.clientY; lastMoveT = t;
             }
-            function onClick() {
+            function onPress() {
                 energy = Math.min(28, energy + 10);
-                pulses.push({ start: now() });
+                pulses.push({ start: performance.now() });
                 if (pulses.length > 8) pulses.shift();
-            }
-            function onTouchMove(e) {
-                if (e.touches && e.touches[0]) onMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+                wake();
             }
 
             window.addEventListener("mousemove", onMove, { passive: true });
-            window.addEventListener("touchmove", onTouchMove, { passive: true });
-            window.addEventListener("click", onClick, { passive: true });
-            window.addEventListener("touchstart", function () { onClick(); }, { passive: true });
-
-            function tanhSoftClamp(v, lim) {
-                // Smooth saturating clamp that asymptotes to ±lim.
-                var x = v / lim;
-                // Approx tanh — Padé-style, ~1.5x faster than Math.tanh for tight
-                // inner loops. Accurate to ~0.001 in [-3, 3] which covers our range.
-                var x2 = x * x;
-                return lim * x * (27 + x2) / (27 + 9 * x2);
-            }
-
-            var lastFrameT = 0;
-            var rafId = 0;
+            window.addEventListener("touchmove", function (e) { onMove(e.touches[0]); }, { passive: true });
+            // pointerdown, not click + touchstart: a tap fires both of those.
+            window.addEventListener("pointerdown", onPress, { passive: true });
 
             function frame(t) {
-                if (!lastFrameT) { lastFrameT = t; rafId = requestAnimationFrame(frame); return; }
-                var dt = t - lastFrameT;
+                // Cap dt so a stalled or backgrounded tab doesn't jump on resume.
+                var dt = lastFrameT ? Math.min(80, t - lastFrameT) : 0;
                 lastFrameT = t;
-                // Cap dt to avoid huge jumps after tab regains focus
-                if (dt > 80) dt = 80;
 
                 // Time-based exponential decay
                 energy *= Math.exp(-dt / DECAY_TAU);
                 if (energy < 0.02) energy = 0;
 
                 // Phase advances at rate (rad/sec) → multiply by dt seconds
-                var rate = BASE_RATE + energy * ENERGY_RATE_K;
-                phase += rate * (dt / 1000);
+                phase += (BASE_RATE + energy * ENERGY_RATE_K) * (dt / 1000);
 
-                var amp = ampBase + Math.min(ampMax, energy * ampGain);
-                // Noise also gated on energy so the trace is a true flatline at rest.
+                var amp = Math.min(ampMax, energy * ampGain);
                 var noiseScale = Math.min(1, energy / noiseRamp);
 
-                // Prune expired pulses
-                if (pulses.length) {
-                    var nowT = t;
-                    var alive = [];
-                    for (var k = 0; k < pulses.length; k++) {
-                        if (nowT - pulses[k].start < PULSE_LIFE_MS) alive.push(pulses[k]);
-                    }
-                    pulses = alive;
-                }
+                pulses = pulses.filter(function (p) { return t - p.start < PULSE_LIFE_MS; });
+                // Per pulse, only the distance to each point varies along the trace.
+                var spikes = pulses.map(function (p) {
+                    var age = (t - p.start) / 1000;            // seconds
+                    var prog = age / (PULSE_LIFE_MS / 1000);   // 0 → 1
+                    var fade = 1 - prog;
+                    return {
+                        x: W - prog * W,                       // travels right→left
+                        k: pulsePeak * fade * fade * Math.sin(age * 22)   // oscillating blip
+                    };
+                });
 
                 var pts = "";
                 for (var i = 0; i < N; i++) {
-                    var x = (i / (N - 1)) * W;
                     var u = i * 0.34 + phase;
                     var dev = Math.sin(u) * amp
                             + Math.sin(u * 0.41 + 1.7) * (amp * harmonic)
                             + Math.sin(u * 1.93) * noiseAmp * noiseScale;
-
-                    if (pulses.length) {
-                        for (var pi = 0; pi < pulses.length; pi++) {
-                            var p = pulses[pi];
-                            var age = (t - p.start) / 1000;            // seconds
-                            var prog = age / (PULSE_LIFE_MS / 1000);   // 0 → 1
-                            var pulseX = W - prog * W;                 // travels right→left
-                            var dx = x - pulseX;
-                            var fade = 1 - prog;
-                            var sigma = 5.5;
-                            var spike = pulsePeak * fade * fade * Math.exp(-(dx * dx) / (2 * sigma * sigma));
-                            dev -= spike * Math.sin(age * 22);          // oscillating blip
-                        }
+                    var x = i / (N - 1) * W;
+                    for (var s = 0; s < spikes.length; s++) {
+                        var dx = x - spikes[s].x;
+                        dev -= spikes[s].k * Math.exp(-(dx * dx) / (2 * pulseSigma * pulseSigma));
                     }
-
-                    var y = MID + tanhSoftClamp(dev, maxDev);
-                    pts += (i === 0 ? "M" : " L") + x.toFixed(2) + " " + y.toFixed(2);
+                    pts += XS[i] + (MID + maxDev * Math.tanh(dev / maxDev)).toFixed(2);
                 }
                 line.setAttribute("d", pts);
 
+                // At rest the line just drawn is flat: stop until the pointer wakes it.
+                if (!energy && !pulses.length) { rafId = 0; lastFrameT = 0; return; }
                 rafId = requestAnimationFrame(frame);
             }
-
-            if (reduce) {
-                // Single static frame — no animation
-                frame(now());
-                return;
-            }
-
-            rafId = requestAnimationFrame(frame);
-            document.addEventListener("visibilitychange", function () {
-                if (document.hidden) {
-                    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-                    lastFrameT = 0;
-                    lastMoveT = 0;
-                } else if (!rafId) {
-                    rafId = requestAnimationFrame(frame);
-                }
-            }, { passive: true });
         })();
     </script>
 </body>
