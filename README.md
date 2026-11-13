@@ -25,6 +25,7 @@ Everything under `public/` is served; nothing else is.
 - `public/LICENSE` — symlink to `LICENSE.md`, so the license is served at `/LICENSE`
 - `source/kV-original.png` — lossless 1520px source of the kV mark (never served)
 - `source/derive-images.sh` — regenerates every image rendition from its source
+- `source/social-preview.html`, `.jpg` — the repository's GitHub social preview card and the page it is rendered from
 - `wrangler.jsonc` — Cloudflare deploy config
 
 ## Images and fonts
@@ -42,10 +43,23 @@ The font files were cut from the Google Fonts `css2` API, requested with a curre
 ## Deploy
 
 Served by Cloudflare Workers static assets — no Worker script, no build.
-Deploy from the repo root with `npx wrangler deploy`; it uploads `public/` and nothing else.
+Cloudflare Workers Builds deploys every push to `main`; it uploads `public/` and nothing else.
+By hand, `npx wrangler deploy` from the repo root does the same, from whatever the working tree holds.
 
 A new public file goes in `public/`.
 `public/.assetsignore` only keeps dotfiles out.
+
+## Performance
+
+Lighthouse 12.8 against production, 2026-11-13 (v1.3.6):
+
+| | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| Mobile | 94 | 100 | 100 | 92 |
+| Desktop | 94 | 100 | 100 | 92 |
+
+SEO loses its points to one line in `robots.txt`, `Content-Signal`, which Lighthouse doesn't recognise; it states the site's crawler and AI-use preferences and stays.
+Performance is Lighthouse's simulated slow-4G estimate; the load it observed finished in under a second.
 
 ## License
 

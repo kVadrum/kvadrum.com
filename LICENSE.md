@@ -68,7 +68,7 @@ SOFTWARE.
 ## Names and logos
 
 The "kVadrum" name and the kV monogram (`public/images/kV.png`, `public/images/kV-32.png`, `public/images/kV-180.png`, and their source `source/kV-original.png`) are not covered by this repository's licenses.
-KeMeK Network reserves all rights in them.
+KeMeK Network reserves all rights in them, and in images that carry them, such as the repository's social preview card `source/social-preview.jpg`.
 Independent forks must replace the name and logo with their own.
 
 ## Third-party fonts
@@ -78,7 +78,7 @@ Their copyright notices and the license text are in [`public/fonts/OFL.txt`](pub
 
 ## Clarification
 
-- The site's structure, styles, scripts, configuration and tooling are code (MIT): the markup, CSS and JavaScript of `public/index.html`, `public/_headers`, `public/robots.txt`, `public/sitemap.xml`, `wrangler.jsonc`, `source/derive-images.sh`, and the repository's dotfiles (`.gitignore`, `.gitattributes`, `public/.assetsignore`).
+- The site's structure, styles, scripts, configuration and tooling are code (MIT): the markup, CSS and JavaScript of `public/index.html`, `public/_headers`, `public/robots.txt`, `public/sitemap.xml`, `wrangler.jsonc`, `source/derive-images.sh`, `source/social-preview.html`, and the repository's dotfiles (`.gitignore`, `.gitattributes`, `public/.assetsignore`).
 - Written copy and photography are content (CC BY 4.0), as listed above.
 - `public/index.html` holds both: its markup, styles and scripts are code; its text is content.
 - A code snippet inside written content may be used under either license.

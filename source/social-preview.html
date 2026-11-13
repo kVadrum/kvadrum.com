@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!-- GitHub social preview card for the repo (Settings → Social preview).
+     1280x640; everything that matters stays inside the 80px border GitHub
+     recommends, since some surfaces crop it. Built from the site's own
+     photograph, mark, fonts and colours. Render it by serving the repo root
+     and screenshotting this page at 1280x640, device scale 1, then save it
+     as source/social-preview.jpg at quality 95 with 4:4:4 chroma: GitHub
+     takes 1MB at most, the PNG comes out over it, and full-resolution
+     chroma keeps the green type crisp. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kVadrum social preview</title>
+<style>
+    @font-face { font-family: "Fraunces"; font-style: normal; font-weight: 320; src: url("../public/fonts/fraunces-roman.woff2") format("woff2"); }
+    @font-face { font-family: "Fraunces"; font-style: italic; font-weight: 380; src: url("../public/fonts/fraunces-italic.woff2") format("woff2"); }
+    @font-face { font-family: "Spectral"; font-style: normal; font-weight: 400; src: url("../public/fonts/spectral-400.woff2") format("woff2"); }
+    @font-face { font-family: "Spectral"; font-style: italic; font-weight: 400; src: url("../public/fonts/spectral-400-italic.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400; src: url("../public/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    :root {
+        --bg: #0a0d0c;
+        --ink: #ecead8;
+        --ink-mid: #b6b4a3;
+        --phosphor: #b8ff3c;
+    }
+    html, body { margin: 0; background: var(--bg); }
+    .card {
+        position: relative;
+        width: 1280px;
+        height: 640px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+    }
+    /* The photograph, graded as on the site; its web of filaments sits
+       on the left, so the type takes the dark right-hand half. */
+    .photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 8% 50%;
+        filter: saturate(0.72) contrast(1.06) brightness(0.78);
+    }
+    .wash {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(10, 13, 12, 0.05) 0%, rgba(10, 13, 12, 0.35) 34%, rgba(10, 13, 12, 0.86) 52%, rgba(10, 13, 12, 0.94) 100%),
+            radial-gradient(90% 80% at 100% 100%, rgba(10, 30, 18, 0.55), transparent 60%),
+            linear-gradient(180deg, rgba(10, 13, 12, 0.35) 0%, transparent 25%, transparent 75%, rgba(10, 13, 12, 0.6) 100%);
+    }
+    .scanlines {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0) 0px, rgba(255, 255, 255, 0) 2px, rgba(0, 0, 0, 0.18) 3px, rgba(0, 0, 0, 0) 4px);
+        opacity: 0.32;
+        mix-blend-mode: multiply;
+    }
+    .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.85'/%3E%3C/svg%3E");
+        background-size: 220px 220px;
+        mix-blend-mode: overlay;
+    }
+
+    /* Type column: x 640–1200, inside the 80px safe border. */
+    .type {
+        position: absolute;
+        left: 640px;
+        right: 80px;
+        top: 80px;
+        bottom: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .id {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 30px;
+    }
+    /* The mark is used as-is; the halo belongs to its frame. */
+    .mark {
+        width: 64px;
+        height: 64px;
+        border-radius: 5px;
+        overflow: hidden;
+        flex: 0 0 auto;
+        box-shadow: 0 0 0 1px rgba(184, 255, 60, 0.12), 0 0 18px rgba(184, 255, 60, 0.22), 0 0 44px rgba(184, 255, 60, 0.1);
+    }
+    .mark img { display: block; width: 100%; height: 100%; }
+    .domain {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 17px;
+        letter-spacing: 0.18em;
+        color: var(--ink-mid);
+    }
+    h1 {
+        margin: 0 0 30px;
+        font-family: "Fraunces", serif;
+        font-weight: 320;
+        font-variation-settings: "opsz" 144, "SOFT" 25;
+        font-size: 148px;
+        line-height: 0.92;
+        letter-spacing: -0.035em;
+        white-space: nowrap;
+    }
+    h1 em {
+        margin-left: 0.05em;
+        font-style: italic;
+        font-weight: 380;
+        font-variation-settings: "opsz" 144, "SOFT" 80;
+        color: var(--phosphor);
+        text-shadow: 0 0 34px rgba(184, 255, 60, 0.24);
+    }
+    p {
+        margin: 0;
+        max-width: 25em;
+        font-family: "Spectral", serif;
+        font-size: 25px;
+        line-height: 1.45;
+        color: var(--ink-mid);
+        text-shadow: 0 1px 14px rgba(10, 13, 12, 0.85);
+    }
+    p em { color: var(--ink); }
+</style>
+</head>
+<body>
+    <div class="card">
+        <img class="photo" src="../public/images/kv-hero-003.jpg" alt="">
+        <div class="wash"></div>
+        <div class="scanlines"></div>
+        <div class="grain"></div>
+        <div class="type">
+            <div class="id">
+                <span class="mark"><img src="kV-original.png" alt="kV"></span>
+                <span class="domain">kvadrum.com</span>
+            </div>
+            <h1>all <em>signal.</em></h1>
+            <p>A lightweight dev lab for systems, prototyping, and <em>controlled chaos</em>.</p>
+        </div>
+    </div>
+</body>
+</html>
