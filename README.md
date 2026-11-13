@@ -34,8 +34,8 @@ Images and fonts are cached for a week, so a changed file reaches returning visi
 
 The font files were cut from the Google Fonts `css2` API, requested with a current browser's User-Agent so it answers with WOFF2:
 
-- Fraunces sets only the headline, so it is cut to the headline's letters (`text=abcdefghijklmnopqrstuvwxyzV.` plus the space) as two static instances: `family=Fraunces:opsz,wght,SOFT,WONK@144,320,25,1` and `family=Fraunces:ital,opsz,wght,SOFT,WONK@1,144,380,80,1`.
-  `WONK` 1 keeps the curled ascenders the variable font draws at this size.
+- Fraunces sets only the headline, so it is cut to the headline's letters (`text=abcdefghijklmnopqrstuvwxyzV.` plus the space): `family=Fraunces:opsz,wght,SOFT,WONK@144,320,25,1` and `family=Fraunces:ital,opsz,wght,SOFT,WONK@1,144,380,80,1`.
+  The files come back pinned at `opsz` 144 and `WONK` 1, which keeps the curled ascenders the full font draws at this size; `wght` and `SOFT` still vary, so the headline's `font-variation-settings` must stay.
   A headline word using any other character needs both files re-cut.
 - Spectral (`family=Spectral:ital,wght@0,400;1,400`) and JetBrains Mono (`family=JetBrains+Mono:wght@400`) use the `latin` subset as served, with its `unicode-range` copied into the page.
 

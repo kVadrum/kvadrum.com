@@ -56,17 +56,17 @@
         src="https://static.cloudflareinsights.com/beacon.min.js"
         data-cf-beacon='{"token": "8323f228fcd54acdbbc821a4942e1016"}'></script>
     <style>
-        /* Files cut from Google Fonts' css2 API (latin subset; Fraunces as
-           static instances). Fraunces sets only the headline, so its files
-           carry just a-z, V, the period and the space: a headline word
-           outside that set needs the files re-cut, or its letters fall
-           back to Times. Cut them with WONK 1, which keeps the curled
-           ascenders the variable font draws at opsz 144; without it the
-           instance comes back with plain ones. */
+        /* Files cut from Google Fonts' css2 API (latin subset). Fraunces
+           sets only the headline, so its files carry just a-z, V, the
+           period and the space: a headline word outside that set needs the
+           files re-cut, or its letters fall back to Times. Its files are
+           pinned at opsz 144 and WONK 1 (which keeps the curled ascenders
+           the full font draws at that size); wght and SOFT still vary, so
+           h1.display's font-variation-settings are load-bearing. */
         @font-face {
             font-family: "Fraunces";
             font-style: normal;
-            font-weight: 320;           /* instance: opsz 144, SOFT 25, WONK 1 */
+            font-weight: 320;
             font-display: swap;
             src: url("/fonts/fraunces-roman.woff2") format("woff2");
             unicode-range: U+20, U+2E, U+56, U+61-7A;
@@ -74,7 +74,7 @@
         @font-face {
             font-family: "Fraunces";
             font-style: italic;
-            font-weight: 380;           /* instance: opsz 144, SOFT 80, WONK 1 */
+            font-weight: 380;
             font-display: swap;
             src: url("/fonts/fraunces-italic.woff2") format("woff2");
             unicode-range: U+20, U+2E, U+56, U+61-7A;
@@ -860,12 +860,14 @@
                 min-height: 100svh;
                 grid-template-rows: auto 1fr auto;
             }
-            .hero, .scanlines, .grain, .hair {
+            .hero, .scanlines, .grain {
                 position: fixed;
                 inset: 0;
             }
-            .hair-h { left: 0; right: 0; height: 1px; bottom: auto; }
-            .hair-v { top: 0; bottom: 0; width: 1px; right: auto; }
+            /* The page scrolls here, and the cursor position is measured
+               against the stage, which outgrows the viewport: a crosshair
+               cannot track the pointer, so it is not drawn. */
+            .hair { display: none; }
             .grain { inset: -40px; }
             .frame-rule, .tick { display: none; }
             /* Text scrolls over the brightest parts of the fixed photograph
@@ -1117,7 +1119,7 @@
                 </div>
                 <div class="strip-cell">
                     <span class="lbl">Ver</span>
-                    <span class="val mono">v1.3.5</span>
+                    <span class="val mono">v1.3.6</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">KeMeK&nbsp;Network&nbsp;&copy;&nbsp;2026</a>
@@ -1219,11 +1221,15 @@
                 var top = topIsA ? A : B;
                 var bot = topIsA ? B : A;
                 var name = pickNext();
+                // The state flips now, only the classes wait for a frame:
+                // frames stall in a hidden tab while timers still run, and
+                // a flip queued behind them would let the next swap load
+                // into the layer on screen.
                 function show() {
+                    topIsA = !topIsA;
                     requestAnimationFrame(function () {
                         bot.classList.add("is-on");
                         top.classList.remove("is-on");
-                        topIsA = !topIsA;
                     });
                 }
                 // The hidden layer can still hold this image from two swaps
@@ -1247,7 +1253,8 @@
                 if (document.hidden) { clearInterval(timer); timer = 0; }
                 else if (!timer) start();
             });
-            start();
+            // A page opened in a background tab starts on its first reveal.
+            if (!document.hidden) start();
         })();
 
         // ----------------------------------------------------------
@@ -1305,7 +1312,7 @@
                 if (document.hidden) { clearInterval(timer); timer = 0; }
                 else if (!timer) start();
             });
-            start();
+            if (!document.hidden) start();
         })();
 
         // ----------------------------------------------------------

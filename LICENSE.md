@@ -10,6 +10,7 @@ Two things are covered by neither license: the kVadrum [name and logo](#names-an
 
 ## Written content and photography (CC BY 4.0)
 
+Copyright (c) 2026 KeMeK Network.
 The written content and photography in this repository are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
 Full legal text: <https://creativecommons.org/licenses/by/4.0/legalcode>
 
@@ -77,7 +78,7 @@ Their copyright notices and the license text are in [`public/fonts/OFL.txt`](pub
 
 ## Clarification
 
-- The site's structure, styles, scripts, configuration and tooling are code (MIT): the markup, CSS and JavaScript of `public/index.html`, `public/_headers`, `public/robots.txt`, `public/sitemap.xml`, `wrangler.jsonc` and `source/derive-images.sh`.
+- The site's structure, styles, scripts, configuration and tooling are code (MIT): the markup, CSS and JavaScript of `public/index.html`, `public/_headers`, `public/robots.txt`, `public/sitemap.xml`, `wrangler.jsonc`, `source/derive-images.sh`, and the repository's dotfiles (`.gitignore`, `.gitattributes`, `public/.assetsignore`).
 - Written copy and photography are content (CC BY 4.0), as listed above.
 - `public/index.html` holds both: its markup, styles and scripts are code; its text is content.
 - A code snippet inside written content may be used under either license.
