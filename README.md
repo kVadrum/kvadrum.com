@@ -1,8 +1,9 @@
-# kvadrum-web
+# kvadrum.com
 
-The [kVadrum](https://kvadrum.com) website. Static single-page site with hero slideshow, parallax effects, and glass panel UI.
+The [kVadrum](https://kvadrum.com) website.
+Static single-page site with hero slideshow, parallax effects, and glass panel UI.
 
-Part of [KeMeK Network](https://kemek.com).
+Part of [KeMeK Network](https://kemek.network).
 
 ## Stack
 
@@ -18,10 +19,10 @@ Everything under `public/` is served; nothing else is.
 - `public/images/kv-hero-00N-{1680,2520,3360}.webp`, `-sq1440.webp` — what the page shows: three widths for landscape screens and the centre square for portrait ones
 - `public/images/kV-32.png`, `kV-180.png` — the kV mark as favicon and as page/home-screen icon
 - `public/images/kV.png` — the 512px mark, kept at its URL for links from elsewhere
-- `public/fonts/` — Fraunces, Spectral and JetBrains Mono, self-hosted; their licence is `public/fonts/OFL.txt`
+- `public/fonts/` — Fraunces, Spectral and JetBrains Mono, self-hosted; their license is `public/fonts/OFL.txt`
 - `public/robots.txt`, `public/sitemap.xml`, `public/llms.txt` — crawler and agent surface
 - `public/_headers` — response headers (security, caching, content types); read by Cloudflare, never served
-- `public/LICENSE` — symlink to `LICENSE`, so the license is served at `/LICENSE`
+- `public/LICENSE` — symlink to `LICENSE.md`, so the license is served at `/LICENSE`
 - `source/kV-original.png` — lossless 1520px source of the kV mark (never served)
 - `source/derive-images.sh` — regenerates every image rendition from its source
 - `wrangler.jsonc` — Cloudflare deploy config
@@ -48,15 +49,11 @@ A new public file goes in `public/`.
 
 ## License
 
-This repository is dual-licensed:
+- **Written content and photography** — the page copy, this README, `public/llms.txt` and the hero photography — are licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Code** — markup, styles, scripts, configuration and tooling — is licensed [MIT](./LICENSE.md#code-mit).
+- **Names and logos** — the "kVadrum" name and the kV monogram are not licensed; KeMeK Network reserves all rights in them.
+- **Fonts** in `public/fonts/` keep their own license, the SIL Open Font License 1.1.
 
-- **Code** (HTML, CSS, JavaScript in `public/index.html`) — [MIT](./LICENSE).
-- **Content** (this README, the visible copy in `public/index.html`, the
-  hero photography in `public/images/kv-hero-*.jpg`) —
-  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-- **Names and logos** — the "kVadrum" name and the kV monogram
-  (`public/images/kV.png`, `source/kV-original.png`) are not covered by
-  these licenses. KeMeK Network reserves all rights in them.
-  See [`LICENSE`](./LICENSE).
+[`LICENSE.md`](./LICENSE.md) has the full terms and says which license applies where a file holds both code and content.
 
 KeMeK Network © 2026.

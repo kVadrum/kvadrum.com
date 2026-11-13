@@ -3,7 +3,7 @@
 // The assets directory is public/, which holds only files meant to be served:
 // the repo root also holds local-only files (STATE.md, CLAUDE.md, .claude/),
 // and an ignore-file guarding them fails open the day it is emptied.
-// public/LICENSE is a symlink to the root LICENSE, which wrangler follows.
+// public/LICENSE is a symlink to the root LICENSE.md, which wrangler follows.
 {
   "name": "kvadrum",
   "compatibility_date": "2026-11-01",
