@@ -15,8 +15,8 @@
     <link rel="canonical" href="https://kvadrum.com/">
 
     <!-- Icons / Apple home-screen -->
-    <link rel="icon" type="image/png" sizes="any" href="/images/kV.png">
-    <link rel="apple-touch-icon" href="/images/kV.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/kV-32.png">
+    <link rel="apple-touch-icon" href="/images/kV-180.png">
     <meta name="apple-mobile-web-app-title" content="kVadrum">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -46,15 +46,64 @@
     <meta name="twitter:image" content="https://kvadrum.com/images/kv-hero-001.jpg">
     <meta name="twitter:image:alt" content="kVadrum — atmospheric panorama">
 
-    <!-- Type fixtures -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Type fixtures: self-hosted (public/fonts/, OFL — see OFL.txt there).
+         The headline is the largest paint and waits on Fraunces, so both
+         of its files are preloaded. -->
+    <link rel="preload" href="/fonts/fraunces-roman.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fraunces-italic.woff2" as="font" type="font/woff2" crossorigin>
     <!-- Cloudflare Web Analytics — privacy-friendly, cookieless pageview/perf beacon -->
     <script defer
         src="https://static.cloudflareinsights.com/beacon.min.js"
         data-cf-beacon='{"token": "8323f228fcd54acdbbc821a4942e1016"}'></script>
     <style>
+        /* Files cut from Google Fonts' css2 API (latin subset; Fraunces as
+           static instances). Fraunces sets only the headline, so its files
+           carry just a-z, V, the period and the space: a headline word
+           outside that set needs the files re-cut, or its letters fall
+           back to Times. Cut them with WONK 1, which keeps the curled
+           ascenders the variable font draws at opsz 144; without it the
+           instance comes back with plain ones. */
+        @font-face {
+            font-family: "Fraunces";
+            font-style: normal;
+            font-weight: 320;           /* instance: opsz 144, SOFT 25, WONK 1 */
+            font-display: swap;
+            src: url("/fonts/fraunces-roman.woff2") format("woff2");
+            unicode-range: U+20, U+2E, U+56, U+61-7A;
+        }
+        @font-face {
+            font-family: "Fraunces";
+            font-style: italic;
+            font-weight: 380;           /* instance: opsz 144, SOFT 80, WONK 1 */
+            font-display: swap;
+            src: url("/fonts/fraunces-italic.woff2") format("woff2");
+            unicode-range: U+20, U+2E, U+56, U+61-7A;
+        }
+        @font-face {
+            font-family: "Spectral";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("/fonts/spectral-400.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: "Spectral";
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+            src: url("/fonts/spectral-400-italic.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+            font-family: "JetBrains Mono";
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url("/fonts/jetbrains-mono-400.woff2") format("woff2");
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
         :root {
             --bg: #0a0d0c;
             --bg-2: #0e1311;
@@ -941,9 +990,19 @@
 <body>
     <div class="stage" id="stage">
         <!-- Hero image stack -->
+        <!-- Two layers for the crossfade. The script picks and sets each
+             image; a src here would be fetched and then thrown away
+             whenever the random first pick differs. -->
         <div class="hero">
-            <img id="heroA" class="hero-img is-on" src="/images/kv-hero-001.jpg" alt="" decoding="async">
-            <img id="heroB" class="hero-img" src="/images/kv-hero-001.jpg" alt="" decoding="async">
+            <picture>
+                <source media="(orientation: portrait)">
+                <img id="heroA" class="hero-img is-on" alt="" decoding="async" sizes="(min-aspect-ratio: 7/3) 104vw, 243vh">
+            </picture>
+            <picture>
+                <source media="(orientation: portrait)">
+                <img id="heroB" class="hero-img" alt="" decoding="async" sizes="(min-aspect-ratio: 7/3) 104vw, 243vh">
+            </picture>
+            <noscript><img class="hero-img is-on" src="/images/kv-hero-001-2520.webp" alt=""></noscript>
         </div>
         <div class="scanlines"></div>
         <div class="grain"></div>
@@ -964,7 +1023,7 @@
         <header class="frame-top">
             <div class="brand">
                 <span class="brand-mark">
-                    <img src="/images/kV.png" alt="kVadrum">
+                    <img src="/images/kV-180.png" alt="kVadrum" width="180" height="180">
                 </span>
                 <span class="brand-tag">TX&middot;001 / Poseidon</span>
             </div>
@@ -1058,7 +1117,7 @@
                 </div>
                 <div class="strip-cell">
                     <span class="lbl">Ver</span>
-                    <span class="val mono">v1.3.3</span>
+                    <span class="val mono">v1.3.4</span>
                 </div>
                 <div class="strip-cell">
                     <a href="https://kemek.network" class="kn">KeMeK&nbsp;Network&nbsp;&copy;&nbsp;2026</a>
@@ -1112,15 +1171,19 @@
         (function () {
             var A = document.getElementById("heroA");
             var B = document.getElementById("heroB");
-            if (!A || !B || REDUCE) return;
+            if (!A || !B) return;
 
-            var HEROES = [
-                "/images/kv-hero-001.jpg",
-                "/images/kv-hero-002.jpg",
-                "/images/kv-hero-003.jpg",
-                "/images/kv-hero-004.jpg"
-            ];
+            // Renditions per hero come from source/derive-images.sh: the
+            // centre square for portrait screens, three widths otherwise.
+            var HEROES = ["kv-hero-001", "kv-hero-002", "kv-hero-003", "kv-hero-004"];
             var HOLD_MS = 16000;
+
+            function setHero(img, name) {
+                var base = "/images/" + name;
+                img.previousElementSibling.srcset = base + "-sq1440.webp";
+                img.srcset = base + "-1680.webp 1680w, " + base + "-2520.webp 2520w, " + base + "-3360.webp 3360w";
+                img.dataset.hero = name;
+            }
 
             function shuffle(a) {
                 for (var i = a.length - 1; i > 0; i--) {
@@ -1142,31 +1205,41 @@
                 return lastSrc;
             }
 
-            // Prime: random first image, both layers point at it
-            A.src = B.src = pickNext();
+            // A random first image, shown still under reduced motion.
+            setHero(A, pickNext());
+            if (REDUCE) return;
             var topIsA = true, timer = 0, loading = false;
 
-            // `loading` spans only the preload, which on a slow link can
-            // outlast HOLD_MS; the next swap waits for it, not for the fade.
+            // The next image loads into the hidden layer, so the browser
+            // picks its rendition, then the layers trade places. `loading`
+            // spans only that load, which on a slow link can outlast
+            // HOLD_MS; the next swap waits for it, not for the fade.
             function swap() {
                 if (loading) return;
-                loading = true;
-                var nextSrc = pickNext();
-                var im = new Image();
-                im.onload = function () {
-                    var top = topIsA ? A : B;
-                    var bot = topIsA ? B : A;
-                    bot.src = nextSrc;
+                var top = topIsA ? A : B;
+                var bot = topIsA ? B : A;
+                var name = pickNext();
+                function show() {
                     requestAnimationFrame(function () {
                         bot.classList.add("is-on");
                         top.classList.remove("is-on");
                         topIsA = !topIsA;
-                        loading = false;
                     });
-                };
+                }
+                // The hidden layer can still hold this image from two swaps
+                // back, and an unchanged srcset fires no load event: show
+                // it if it loaded, skip it if it broke.
+                if (bot.dataset.hero === name && bot.complete) {
+                    if (bot.naturalWidth) show();
+                    return;
+                }
+                loading = true;
+                // Cleared once fired: a rotation re-picks the rendition and
+                // fires load again, which must not trigger a swap.
+                bot.onload = function () { bot.onload = bot.onerror = null; loading = false; show(); };
                 // A broken image is skipped: the current one stays up.
-                im.onerror = function () { loading = false; };
-                im.src = nextSrc;
+                bot.onerror = function () { bot.onload = bot.onerror = null; loading = false; };
+                setHero(bot, name);
             }
 
             function start() { timer = setInterval(swap, HOLD_MS); }

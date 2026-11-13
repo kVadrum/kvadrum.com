@@ -6,6 +6,14 @@
   Content-Security-Policy: frame-ancestors 'none'
   X-Frame-Options: DENY
 
+# A week without revalidation; the default (max-age=0) costs a returning
+# visitor one round trip per file. A changed image or font needs a new
+# file name to reach those visitors inside the week.
+/images/*
+  Cache-Control: public, max-age=604800
+/fonts/*
+  Cache-Control: public, max-age=604800
+
 # Extensionless, so it gets no Content-Type by default; with nosniff on,
 # browsers then refuse to render it.
 /LICENSE
